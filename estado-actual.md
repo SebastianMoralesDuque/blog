@@ -34,12 +34,8 @@ Blog automatizado en `blog.sebastianmorales.sbs` que publica 2 posts diarios con
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| **Crear repo Gitea** | ⏳ Pendiente | Repo privado `sebastianmorales/blog` |
-| **Push código** | ⏳ Pendiente | Requiere repo Gitea primero |
-| **Configurar Coolify** | ⏳ Pendiente | Requiere repo Gitea + env vars |
-| **Configurar cron job** | ⏳ Pendiente | 08:00 y 20:00 UTC diariamente |
-| **Verificar despliegue** | ⏳ Pendiente | Requiere Coolify configurado |
-| **Verificar primera generación** | ⏳ Pendiente | Requiere cron + Ollama funcionando |
+| **Configurar env vars en Coolify** | ⏳ Pendiente | OLLAMA_BASE_URL, UMAMI_WEBSITE_ID, etc. |
+| **Verificar primera generación** | ⏳ Pendiente | Próxima ejecución: 20:00 UTC hoy |
 
 ---
 
@@ -68,6 +64,7 @@ Blog automatizado en `blog.sebastianmorales.sbs` que publica 2 posts diarios con
 | PR 2 | `39ee013` | Contenido + SEO (RSS, llms.txt, robots.txt, JSON-LD) | 2026-07-01 |
 | PR 3 | `a41dc20` | Automatización (Python script + Ollama) | 2026-07-01 |
 | PR 4 | `0c4b0f4` | Analytics + Marca (Umami + /about) | 2026-07-01 |
+| PR 5 | `038bc8c` | Dockerfile + nginx config (producción) | 2026-07-01 |
 
 ---
 
@@ -88,12 +85,14 @@ SITE_URL=https://blog.sebastianmorales.sbs
 
 ---
 
-## Cron Job (para configurar)
+## Cron Job (configurado)
 
 ```bash
 # Ejecutar a las 08:00 y 20:00 UTC
 0 8,20 * * * cd /home/ubuntu/projects/blog && /usr/bin/python3 scripts/generate_post.py >> /home/ubuntu/projects/blog/blog-generation.log 2>&1
 ```
+
+**Estado:** ✅ Configurado en crontab del VPS
 
 ---
 
@@ -105,6 +104,8 @@ SITE_URL=https://blog.sebastianmorales.sbs
 ├── package.json              # Dependencias
 ├── tsconfig.json             # TypeScript config
 ├── tailwind.config.mjs       # Configuración Tailwind
+├── Dockerfile                # Build multi-etapa (Node + nginx)
+├── nginx.conf                # Configuración nginx
 ├── .env.example              # Variables de entorno
 ├── .gitignore                # Archivos ignorados
 ├── src/
@@ -143,15 +144,15 @@ SITE_URL=https://blog.sebastianmorales.sbs
 
 ---
 
-## Próximos Pasos (después del despliegue)
+## Próximos Pasos
 
-1. **Verificar que el blog carga** en `blog.sebastianmorales.sbs`
-2. **Verificar RSS feed** en `blog.sebastianmorales.sbs/rss.xml`
-3. **Verificar llms.txt** en `blog.sebastianmorales.sbs/llms.txt`
-4. **Verificar analytics** en Umami dashboard
-5. **Esperar primera generación** (cron 08:00 o 20:00 UTC)
-6. **Verificar posts generados** en el blog
-7. **Monitorear calidad** del contenido generado
+1. ✅ **Verificar que el blog carga** en `blog.sebastianmorales.sbs` — HTTP 200
+2. ✅ **Verificar RSS feed** en `blog.sebastianmorales.sbs/rss.xml` — Funcionando
+3. ✅ **Verificar llms.txt** en `blog.sebastianmorales.sbs/llms.txt` — Funcionando
+4. ⏳ **Verificar analytics** en Umami dashboard — Requiere configurar UMAMI_WEBSITE_ID
+5. ⏳ **Esperar primera generación** — Próxima ejecución: 20:00 UTC hoy
+6. ⏳ **Verificar posts generados** en el blog
+7. ⏳ **Monitorear calidad** del contenido generado
 
 ---
 
@@ -161,3 +162,16 @@ SITE_URL=https://blog.sebastianmorales.sbs
 - El modelo `minimax-m3:cloud` es configurable via env var `OLLAMA_MODEL`
 - Umami está configurado para no trackear en modo desarrollo
 - El script de generación tiene retry automático si Ollama falla
+
+---
+
+## Despliegue
+
+**URL:** https://blog.sebastianmorales.sbs
+**UUID Coolify:** `zzhjq78rmhdl4aw6d0vdn3rz`
+**Repo:** https://github.com/SebastianMoralesDuque/blog (público)
+**Build:** Dockerfile multi-etapa (Node.js builder + nginx alpine)
+**Traefik:** Auto-configurado via Coolify Docker labels
+
+**Commits desplegados:** `038bc8c` (HEAD)
+**Último deploy:** 2026-07-01 21:47 UTC
