@@ -53,16 +53,16 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Automation Pipeline
 
-- [ ] 3.1 Create `scripts/generate_post.py` with Ollama API integration
-- [ ] 3.2 Add HackerNews API fetch logic
-- [ ] 3.3 Add RSS feed fetch logic (feedparser)
-- [ ] 3.4 Add story selection algorithm
-- [ ] 3.5 Add content generation with prompt template
-- [ ] 3.6 Create `scripts/prompt_template.txt` with Marxist analysis prompt
-- [ ] 3.7 Add MDX file generation with frontmatter
-- [ ] 3.8 Add git automation (add, commit, push)
-- [ ] 3.9 Add error handling and retry logic
-- [ ] 3.10 Create `scripts/requirements.txt` with Python dependencies
+- [x] 3.1 Create `scripts/generate_post.py` with Ollama API integration
+- [x] 3.2 Add HackerNews API fetch logic
+- [x] 3.3 Add RSS feed fetch logic (feedparser)
+- [x] 3.4 Add story selection algorithm
+- [x] 3.5 Add content generation with prompt template
+- [x] 3.6 Create `scripts/prompt_template.txt` with Marxist analysis prompt
+- [x] 3.7 Add MDX file generation with frontmatter
+- [x] 3.8 Add git automation (add, commit, push)
+- [x] 3.9 Add error handling and retry logic
+- [x] 3.10 Create `scripts/requirements.txt` with Python dependencies
 - [ ] 3.11 Configure cron job (08:00 and 20:00 UTC)
 
 ## Phase 4: Analytics + Personal Brand

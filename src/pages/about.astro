@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const socialLinks = [
+  {
+    href: 'https://linkedin.com/in/sebastianmorales',
+    label: 'LinkedIn',
+    description: 'Conectemos profesionalmente',
+    icon: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
+  },
+  {
+    href: 'https://github.com/sebastianmorales',
+    label: 'GitHub',
+    description: 'Revisa mis proyectos',
+    icon: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
+  },
+  {
+    href: 'mailto:dev@sebastianmorales.sbs',
+    label: 'Email',
+    description: 'Escríbeme directamente',
+    icon: 'M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z',
+  },
+];
+---
+
+<BaseLayout title="Sobre mí" description="Sebastian Morales — Desarrollador Full Stack apasionado por la tecnología y el análisis crítico.">
+  <div class="max-w-4xl mx-auto px-4 py-12 md:py-16">
+    <!-- Hero Section -->
+    <section class="mb-12 md:mb-16">
+      <div class="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
+        <!-- Avatar -->
+        <div class="flex-shrink-0">
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-4xl md:text-5xl font-bold shadow-lg">
+            SM
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="flex-1">
+          <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+            Sebastian Morales
+          </h1>
+          <p class="text-xl text-gray-600 mb-6 leading-relaxed">
+            Desarrollador Full Stack con pasión por la tecnología y el análisis crítico de la industria.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium text-brand-700 bg-brand-100 rounded-full">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Full Stack Developer
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium text-emerald-700 bg-emerald-100 rounded-full">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Tech Analyst
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Content -->
+    <section class="mb-12 md:mb-16">
+      <div class="prose prose-lg prose-gray max-w-none">
+        <h2>Sobre mí</h2>
+        <p>
+          Soy un desarrollador Full Stack con más de 10 años de experiencia construyendo aplicaciones web modernas.
+          Mi pasión no es solo escribir código, sino entender <strong>por qué</strong> construimos las cosas que construimos
+          y <strong>para quién</strong> están diseñadas.
+        </p>
+        <p>
+          Este blog nace de mi interés por analizar la industria tecnológica desde una perspectiva crítica.
+          Creo que la tecnología no es neutral — refleja las relaciones de poder, las estructuras económicas
+          y las decisiones políticas de quienes la crean. Cada artículo que escribo busca ir más allá del
+          hype para entender las dinámicas reales que impulsan la innovación.
+        </p>
+        <p>
+          Cuando no estoy programando o escribiendo, me encontrarás explorando nuevas herramientas de IA,
+          contribuyendo a proyectos open source, o debatiendo sobre el futuro de la tecnología y su impacto
+          en la sociedad.
+        </p>
+
+        <h2>Lo que hago</h2>
+        <ul>
+          <li><strong>Desarrollo Web:</strong> React, Astro, Node.js, Python, bases de datos</li>
+          <li><strong>Análisis de Tecnología:</strong> Tendencias, impacto social, estructuras de poder</li>
+          <li><strong>Infraestructura:</strong> Docker, Coolify, servidores self-hosted</li>
+          <li><strong>Inteligencia Artificial:</strong> LLMs, automatización, herramientas de productividad</li>
+        </ul>
+
+        <h2>Valores</h2>
+        <p>
+          Creo firmemente en la tecnología como herramienta de empoderamiento, no de control.
+          Por eso construyo soluciones open source, self-hosted y orientadas a la privacidad.
+          La tecnología debe servir a las personas, no al revés.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="bg-gray-50 rounded-2xl p-8 md:p-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">¿Trabajamos juntos?</h2>
+        <p class="text-gray-600">
+          Siempre abierto a nuevas oportunidades, colaboraciones y conversaciones interesantes.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {socialLinks.map((link) => (
+          <a
+            href={link.href}
+            target={link.href.startsWith('mailto') ? undefined : '_blank'}
+            rel={link.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+            class="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-brand-300 hover:shadow-md transition-all group"
+          >
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-100 flex items-center justify-center text-brand-600 group-hover:bg-brand-200 transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d={link.icon} />
+              </svg>
+            </div>
+            <div>
+              <div class="font-medium text-gray-900 group-hover:text-brand-600 transition-colors">
+                {link.label}
+              </div>
+              <div class="text-sm text-gray-500">
+                {link.description}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
