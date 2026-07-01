@@ -41,14 +41,14 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: Content System + SEO
 
-- [ ] 2.1 Create `src/layouts/PostLayout.astro` with article metadata
-- [ ] 2.2 Create `src/pages/rss.xml.ts` with RSS 2.0 feed
+- [x] 2.1 Create `src/layouts/PostLayout.astro` with article metadata
+- [x] 2.2 Create `src/pages/rss.xml.ts` with RSS 2.0 feed
 - [x] 2.3 Add JSON-LD to BaseLayout for Blog schema
-- [ ] 2.4 Add JSON-LD to PostLayout for BlogPosting schema
+- [x] 2.4 Add JSON-LD to PostLayout for BlogPosting schema
 - [x] 2.5 Add Open Graph and Twitter Card meta tags
-- [ ] 2.6 Create `public/robots.txt` with sitemap reference
-- [ ] 2.7 Create `public/llms.txt` with site description
-- [ ] 2.8 Create `public/llms-full.txt` (generated at build)
+- [x] 2.6 Create `public/robots.txt` with sitemap reference
+- [x] 2.7 Create `public/llms.txt` with site description
+- [x] 2.8 Create `public/llms-full.txt` (generated at build)
 - [x] 2.9 Add canonical URLs to all pages
 
 ## Phase 3: Automation Pipeline
