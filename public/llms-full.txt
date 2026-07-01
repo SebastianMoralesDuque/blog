@@ -1,0 +1,8 @@
+# Crítica Tecnológica — Contenido Completo
+
+> Este archivo contiene el contenido completo de todos los artículos del blog.
+> Actualizado automáticamente en cada build.
+
+## Artículos
+
+_No hay artículos publicados aún. Este archivo se actualizará automáticamente cuando se publiquen artículos._

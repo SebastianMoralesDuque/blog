@@ -28,9 +28,31 @@ const formattedDate = pubDate.toLocaleDateString('es-ES', {
 });
 
 const readingTime = Math.ceil(Astro.props.toString().split(/\s+/).length / 200);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "datePublished": pubDate.toISOString(),
+  "author": {
+    "@type": "Person",
+    "name": author,
+    "url": "https://sebastianmorales.sbs"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Sebastian Morales"
+  },
+  "keywords": tags.join(', '),
+  "image": new URL(image, Astro.site).href,
+  "url": Astro.url.href,
+};
 ---
 
 <BaseLayout title={title} description={description} image={image}>
+  <!-- JSON-LD BlogPosting -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <article class="max-w-4xl mx-auto px-4 py-12 md:py-16">
     <!-- Article Header -->
     <header class="mb-8 md:mb-12">

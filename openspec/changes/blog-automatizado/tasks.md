@@ -29,27 +29,27 @@ Chain strategy: stacked-to-main
 
 ## Phase 1: Project Foundation
 
-- [ ] 1.1 Initialize Astro project: `npm create astro@latest blog -- --template minimal`
-- [ ] 1.2 Install dependencies: `@astrojs/mdx`, `@astrojs/tailwind`, `@astrojs/sitemap`
-- [ ] 1.3 Configure `astro.config.mjs` with integrations
-- [ ] 1.4 Create `src/content.config.ts` with blog collection schema
-- [ ] 1.5 Create `.env.example` with all environment variables
-- [ ] 1.6 Create `src/layouts/BaseLayout.astro` with head, nav, footer slots
-- [ ] 1.7 Create `src/components/Header.astro` with responsive navigation
-- [ ] 1.8 Create `src/components/Footer.astro` with professional links
-- [ ] 1.9 Create `src/pages/index.astro` with post list
+- [x] 1.1 Initialize Astro project: `npm create astro@latest blog -- --template minimal`
+- [x] 1.2 Install dependencies: `@astrojs/mdx`, `@astrojs/tailwind`, `@astrojs/sitemap`
+- [x] 1.3 Configure `astro.config.mjs` with integrations
+- [x] 1.4 Create `src/content.config.ts` with blog collection schema
+- [x] 1.5 Create `.env.example` with all environment variables
+- [x] 1.6 Create `src/layouts/BaseLayout.astro` with head, nav, footer slots
+- [x] 1.7 Create `src/components/Header.astro` with responsive navigation
+- [x] 1.8 Create `src/components/Footer.astro` with professional links
+- [x] 1.9 Create `src/pages/index.astro` with post list
 
 ## Phase 2: Content System + SEO
 
 - [ ] 2.1 Create `src/layouts/PostLayout.astro` with article metadata
 - [ ] 2.2 Create `src/pages/rss.xml.ts` with RSS 2.0 feed
-- [ ] 2.3 Add JSON-LD to BaseLayout for Blog schema
+- [x] 2.3 Add JSON-LD to BaseLayout for Blog schema
 - [ ] 2.4 Add JSON-LD to PostLayout for BlogPosting schema
-- [ ] 2.5 Add Open Graph and Twitter Card meta tags
+- [x] 2.5 Add Open Graph and Twitter Card meta tags
 - [ ] 2.6 Create `public/robots.txt` with sitemap reference
 - [ ] 2.7 Create `public/llms.txt` with site description
 - [ ] 2.8 Create `public/llms-full.txt` (generated at build)
-- [ ] 2.9 Add canonical URLs to all pages
+- [x] 2.9 Add canonical URLs to all pages
 
 ## Phase 3: Automation Pipeline
 
@@ -67,16 +67,16 @@ Chain strategy: stacked-to-main
 
 ## Phase 4: Analytics + Personal Brand
 
-- [ ] 4.1 Add Umami script to BaseLayout with `data-astro-rerun`
-- [ ] 4.2 Configure Umami via environment variables
+- [x] 4.1 Add Umami script to BaseLayout with `data-astro-rerun`
+- [x] 4.2 Configure Umami via environment variables
 - [ ] 4.3 Create `src/pages/about.astro` with bio and professional links
-- [ ] 4.4 Add LinkedIn, GitHub, and email links
-- [ ] 4.5 Add about page to header navigation
-- [ ] 4.6 Add about page to footer navigation
+- [x] 4.4 Add LinkedIn, GitHub, and email links
+- [x] 4.5 Add about page to header navigation
+- [x] 4.6 Add about page to footer navigation
 
 ## Phase 5: Testing + Verification
 
-- [ ] 5.1 Test `npm run build` succeeds
+- [x] 5.1 Test `npm run build` succeeds
 - [ ] 5.2 Validate sitemap.xml output
 - [ ] 5.3 Validate RSS feed output
 - [ ] 5.4 Validate JSON-LD with Google Rich Results
