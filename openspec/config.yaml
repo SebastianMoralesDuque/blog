@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Astro + MDX, Tailwind CSS, Python (automation), Ollama AI
+  Architecture: Static blog with automated content pipeline
+  Deployment: Coolify + Gitea (private repo)
+  Analytics: Umami self-hosted (analytics.sebastianmorales.sbs)
+  SEO: Traditional (sitemap, RSS) + AI agent (llms.txt, JSON-LD)
+  Infrastructure: Ubuntu 22.04 ARM, Ollama at 127.0.0.1:11434
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Consider impact on existing VPS services
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include architecture diagram for content pipeline
+    - Document env var configuration for model swapping
+    - Plan for Coolify deployment with env vars
+  tasks:
+    - Group by phase: (1) Project setup, (2) Blog core, (3) Automation pipeline, (4) SEO, (5) Analytics, (6) Deployment
+    - Keep tasks completable in one session
+  apply:
+    - Follow Astro best practices
+    - Use TypeScript where possible
+    - Environment variables for all configurable values
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
