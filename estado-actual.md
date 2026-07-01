@@ -34,7 +34,6 @@ Blog automatizado en `blog.sebastianmorales.sbs` que publica 2 posts diarios con
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| **Configurar env vars en Coolify** | ⏳ Pendiente | OLLAMA_BASE_URL, UMAMI_WEBSITE_ID, etc. |
 | **Verificar primera generación** | ⏳ Pendiente | Próxima ejecución: 20:00 UTC hoy |
 
 ---
@@ -149,7 +148,7 @@ SITE_URL=https://blog.sebastianmorales.sbs
 1. ✅ **Verificar que el blog carga** en `blog.sebastianmorales.sbs` — HTTP 200
 2. ✅ **Verificar RSS feed** en `blog.sebastianmorales.sbs/rss.xml` — Funcionando
 3. ✅ **Verificar llms.txt** en `blog.sebastianmorales.sbs/llms.txt` — Funcionando
-4. ⏳ **Verificar analytics** en Umami dashboard — Requiere configurar UMAMI_WEBSITE_ID
+4. ✅ **Verificar analytics** en Umami dashboard — Umami configurado y funcionando
 5. ⏳ **Esperar primera generación** — Próxima ejecución: 20:00 UTC hoy
 6. ⏳ **Verificar posts generados** en el blog
 7. ⏳ **Monitorear calidad** del contenido generado
