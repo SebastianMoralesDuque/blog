@@ -10,10 +10,86 @@
   }
 
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-surface-50 text-surface-800;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
 
   ::selection {
     @apply bg-brand-200 text-brand-900;
   }
+
+  /* Smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400;
+  }
+}
+
+@layer components {
+  /* Glass card effect */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg shadow-black/5;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-600 via-brand-500 to-fuchsia-500 bg-clip-text text-transparent;
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-xl shadow-brand-500/10;
+  }
+
+  /* Animated underline */
+  .animated-underline {
+    @apply relative;
+  }
+  .animated-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-500 to-fuchsia-500 transition-all duration-300 ease-out;
+  }
+  .animated-underline:hover::after {
+    @apply w-full;
+  }
+
+  /* Tag chip */
+  .tag-chip {
+    @apply inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full
+           bg-gradient-to-r from-brand-50 to-fuchsia-50
+           text-brand-700 border border-brand-200/50
+           hover:from-brand-100 hover:to-fuchsia-100 hover:border-brand-300/50
+           transition-all duration-200;
+  }
+
+  /* Noise overlay */
+  .noise::before {
+    content: '';
+    @apply absolute inset-0 opacity-[0.03] pointer-events-none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
 }
