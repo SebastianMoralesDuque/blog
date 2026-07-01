@@ -5,11 +5,9 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# Accept build args for Umami
-ARG UMAMI_WEBSITE_ID
-ARG UMAMI_SCRIPT_URL
-ENV UMAMI_WEBSITE_ID=$UMAMI_WEBSITE_ID
-ENV UMAMI_SCRIPT_URL=$UMAMI_SCRIPT_URL
+# Umami analytics (hardcoded for production)
+ENV UMAMI_WEBSITE_ID=6626ec48-ab22-4b2c-a57b-b047721d9263
+ENV UMAMI_SCRIPT_URL=https://analytics.sebastianmorales.sbs/script.js
 
 RUN npm run build
 
