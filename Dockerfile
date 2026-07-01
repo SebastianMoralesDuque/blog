@@ -4,6 +4,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+
+# Accept build args for Umami
+ARG UMAMI_WEBSITE_ID
+ARG UMAMI_SCRIPT_URL
+ENV UMAMI_WEBSITE_ID=$UMAMI_WEBSITE_ID
+ENV UMAMI_SCRIPT_URL=$UMAMI_SCRIPT_URL
+
 RUN npm run build
 
 # Production stage
