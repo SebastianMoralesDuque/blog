@@ -69,7 +69,7 @@ Chain strategy: stacked-to-main
 
 - [x] 4.1 Add Umami script to BaseLayout with `data-astro-rerun`
 - [x] 4.2 Configure Umami via environment variables
-- [ ] 4.3 Create `src/pages/about.astro` with bio and professional links
+- [x] 4.3 Create `src/pages/about.astro` with bio and professional links
 - [x] 4.4 Add LinkedIn, GitHub, and email links
 - [x] 4.5 Add about page to header navigation
 - [x] 4.6 Add about page to footer navigation
