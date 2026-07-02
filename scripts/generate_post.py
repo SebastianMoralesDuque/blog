@@ -11,6 +11,8 @@ import json
 import re
 import subprocess
 import logging
+import time
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -38,6 +40,15 @@ OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'minimax-m3:cloud')
 SITE_URL = os.getenv('SITE_URL', 'https://blog.sebastianmorales.sbs')
 
+# File Browser configuration
+FILEBROWSER_URL = os.getenv('FILEBROWSER_URL', 'https://files.sebastianmorales.sbs')
+FILEBROWSER_USER = os.getenv('FILEBROWSER_USER', 'sebas')
+FILEBROWSER_PASS = os.getenv('FILEBROWSER_PASS', 'sebashacolico2')
+
+# Pollinations.ai configuration
+POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt'
+DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=675&fit=crop'
+
 # Paths
 BLOG_CONTENT_DIR = PROJECT_ROOT / 'src' / 'content' / 'blog'
 PROMPT_TEMPLATE_PATH = PROJECT_ROOT / 'scripts' / 'prompt_template.txt'
@@ -49,6 +60,162 @@ RSS_FEEDS = [
     'https://www.theverge.com/rss/index.xml',
     'https://feeds.arstechnica.com/arstechnica/index',
 ]
+
+
+def login_filebrowser() -> Optional[str]:
+    """Get JWT token from File Browser."""
+    try:
+        resp = requests.post(
+            f'{FILEBROWSER_URL}/api/login',
+            json={
+                'username': FILEBROWSER_USER,
+                'password': FILEBROWSER_PASS,
+            },
+            timeout=10,
+        )
+        resp.raise_for_status()
+        token = resp.text.strip().strip('"')
+        logger.info('Logged in to File Browser')
+        return token
+    except Exception as e:
+        logger.error(f'Failed to login to File Browser: {e}')
+        return None
+
+
+def download_pollinations_image(prompt: str, output_path: str, width: int = 1200, height: int = 675) -> bool:
+    """Download image from Pollinations.ai with retry."""
+    encoded_prompt = urllib.parse.quote(prompt)
+    url = f'{POLLINATIONS_BASE}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true'
+
+    for attempt in range(3):
+        try:
+            logger.info(f'Downloading image from Pollinations (attempt {attempt + 1})')
+            resp = requests.get(url, timeout=60, stream=True)
+            resp.raise_for_status()
+
+            with open(output_path, 'wb') as f:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            file_size = os.path.getsize(output_path)
+            if file_size > 1000:  # At least 1KB
+                logger.info(f'Downloaded image: {output_path} ({file_size} bytes)')
+                return True
+            else:
+                logger.warning(f'Downloaded file too small: {file_size} bytes')
+                os.remove(output_path)
+
+        except Exception as e:
+            logger.warning(f'Pollinations download attempt {attempt + 1} failed: {e}')
+            if attempt < 2:
+                time.sleep(5)
+
+    # Fallback to default image
+    logger.warning('Using default fallback image')
+    try:
+        resp = requests.get(DEFAULT_IMAGE, timeout=30, stream=True)
+        resp.raise_for_status()
+        with open(output_path, 'wb') as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return True
+    except Exception as e:
+        logger.error(f'Failed to download fallback image: {e}')
+        return False
+
+
+def upload_to_filebrowser(local_path: str, remote_path: str, token: str) -> Optional[str]:
+    """Upload image to File Browser. Returns public URL."""
+    try:
+        with open(local_path, 'rb') as f:
+            file_data = f.read()
+
+        resp = requests.post(
+            f'{FILEBROWSER_URL}/api/resources/{remote_path}?override=true',
+            headers={'X-Auth': token},
+            data=file_data,
+            timeout=30,
+        )
+        resp.raise_for_status()
+
+        public_url = f'{FILEBROWSER_URL}/files/{remote_path}'
+        logger.info(f'Uploaded to File Browser: {public_url}')
+        return public_url
+
+    except Exception as e:
+        logger.error(f'Failed to upload to File Browser: {e}')
+        return None
+
+
+def parse_image_prompts(text: str) -> dict:
+    """Extract IMAGE_PROMPT and MERMAID from LLM output."""
+    result = {
+        'image_prompts': [],
+        'mermaid': None,
+    }
+
+    # Extract IMAGE_PROMPTs
+    image_matches = re.findall(r'IMAGE_PROMPT:\s*(.+?)(?=\n(?:IMAGE_PROMPT:|MERMAID:|$))', text, re.DOTALL)
+    for match in image_matches[:2]:  # Max 2
+        prompt = match.strip()
+        if prompt:
+            result['image_prompts'].append(prompt)
+
+    # Extract MERMAID
+    mermaid_match = re.search(r'MERMAID:\s*(.+?)(?=\n\n|\Z)', text, re.DOTALL)
+    if mermaid_match:
+        mermaid_code = mermaid_match.group(1).strip()
+        # Clean up mermaid code - remove markdown code fences if present
+        mermaid_code = re.sub(r'^```mermaid\s*', '', mermaid_code)
+        mermaid_code = re.sub(r'\s*```$', '', mermaid_code)
+        if mermaid_code:
+            result['mermaid'] = mermaid_code
+
+    logger.info(f'Parsed {len(result["image_prompts"])} image prompts, mermaid: {bool(result["mermaid"])}')
+    return result
+
+
+def inject_images_into_content(content: str, image_urls: list[str], mermaid_code: Optional[str]) -> str:
+    """Inject images and mermaid diagram into content."""
+    lines = content.split('\n')
+    new_lines = []
+    image_index = 0
+    heading_count = 0
+
+    for line in lines:
+        new_lines.append(line)
+
+        # Insert image after every 2-3 headings
+        if line.startswith('## ') and image_index < len(image_urls):
+            heading_count += 1
+            if heading_count % 2 == 0:  # Every 2 headings
+                new_lines.append('')
+                new_lines.append(f'![Imagen del artículo]({image_urls[image_index]})')
+                new_lines.append('')
+                image_index += 1
+
+    # Insert remaining images at end if not all used
+    while image_index < len(image_urls):
+        new_lines.append('')
+        new_lines.append(f'![Imagen del artículo]({image_urls[image_index]})')
+        new_lines.append('')
+        image_index += 1
+
+    # Insert mermaid diagram before conclusion if exists and not already in content
+    if mermaid_code and '```mermaid' not in content:
+        conclusion_idx = len(new_lines)
+        for i in range(len(new_lines) - 1, -1, -1):
+            if '## Conclusión' in new_lines[i] or '## Conclu' in new_lines[i]:
+                conclusion_idx = i
+                break
+
+        new_lines.insert(conclusion_idx, '')
+        new_lines.insert(conclusion_idx + 1, '```mermaid')
+        new_lines.insert(conclusion_idx + 2, mermaid_code)
+        new_lines.insert(conclusion_idx + 3, '```')
+        new_lines.insert(conclusion_idx + 4, '')
+
+    return '\n'.join(new_lines)
 
 
 def fetch_hackernews_stories(limit: int = 10) -> list[dict]:
@@ -188,6 +355,7 @@ def generate_content(story: dict, prompt_template: str) -> Optional[dict]:
         if parsed:
             parsed['source_url'] = story.get('url', '')
             parsed['source_name'] = story.get('source', 'Unknown')
+            parsed['raw_response'] = response_text
         return parsed
 
     except requests.exceptions.Timeout:
@@ -201,10 +369,11 @@ def generate_content(story: dict, prompt_template: str) -> Optional[dict]:
 def parse_generated_content(text: str) -> Optional[dict]:
     """Parse the structured output from Ollama."""
     try:
-        # Extract fields
-        title_match = re.search(r'TITLE:\s*(.+?)(?:\n|$)', text)
-        desc_match = re.search(r'DESCRIPTION:\s*(.+?)(?:\n|$)', text)
-        tags_match = re.search(r'TAGS:\s*(.+?)(?:\n|$)', text)
+        # Extract fields - use a more robust parsing approach
+        # Find TITLE: everything until next field or newline
+        title_match = re.search(r'TITLE:\s*(.+?)(?:\n|DESCRIPTION:)', text, re.DOTALL)
+        desc_match = re.search(r'DESCRIPTION:\s*(.+?)(?:\n|TAGS:)', text, re.DOTALL)
+        tags_match = re.search(r'TAGS:\s*(.+?)(?:\n|CONTENT:)', text, re.DOTALL)
         content_match = re.search(r'CONTENT:\s*(.*)', text, re.DOTALL)
 
         if not all([title_match, desc_match, content_match]):
@@ -215,6 +384,21 @@ def parse_generated_content(text: str) -> Optional[dict]:
         description = desc_match.group(1).strip()
         tags_str = tags_match.group(1).strip() if tags_match else ''
         content = content_match.group(1).strip()
+
+        # Remove IMAGE_PROMPT and MERMAID lines from content
+        content = re.sub(r'\n?IMAGE_PROMPT:\s*.+?\n', '\n', content)
+        content = re.sub(r'\n?MERMAID:\s*.+?\n', '\n', content, flags=re.DOTALL)
+        
+        # Remove mermaid code blocks from content (they'll be injected separately)
+        content = re.sub(r'\n?```mermaid\n.*?\n```\n?', '\n', content, flags=re.DOTALL)
+        
+        # Also remove mermaid code without fences (sometimes LLM includes raw mermaid)
+        # Remove any line that contains --> (mermaid arrow syntax)
+        lines = content.split('\n')
+        lines = [line for line in lines if '-->' not in line]
+        content = '\n'.join(lines)
+        
+        content = content.strip()
 
         # Parse tags
         tags = [t.strip() for t in tags_str.split(',') if t.strip()]
@@ -237,7 +421,7 @@ def parse_generated_content(text: str) -> Optional[dict]:
         return None
 
 
-def create_mdx_file(post_data: dict) -> Path:
+def create_mdx_file(post_data: dict, image_urls: list[str], mermaid_code: Optional[str]) -> Path:
     """Create MDX file for the blog post."""
     now = datetime.now(timezone.utc)
     date_str = now.strftime('%Y-%m-%d')
@@ -250,6 +434,10 @@ def create_mdx_file(post_data: dict) -> Path:
     # Create MDX content — escape inner quotes for valid YAML
     safe_title = post_data['title'].replace('"', '\\"')
     safe_desc = post_data['description'].replace('"', '\\"')
+
+    # Use first image as OG image
+    og_image = image_urls[0] if image_urls else ''
+
     frontmatter = f"""---
 title: "{safe_title}"
 description: "{safe_desc}"
@@ -257,11 +445,16 @@ pubDate: {now.isoformat()}
 author: "Sebastian Morales"
 tags: {json.dumps(post_data['tags'])}
 source: "{post_data['source_name']}"
+image: "{og_image}"
 draft: false
 ---
 
 """
-    content = frontmatter + post_data['content']
+
+    # Inject images into content
+    content_with_images = inject_images_into_content(post_data['content'], image_urls, mermaid_code)
+
+    content = frontmatter + content_with_images
 
     filepath.write_text(content, encoding='utf-8')
     logger.info(f'Created post: {filepath}')
@@ -302,6 +495,27 @@ def git_commit_and_push(filepath: Path, title: str):
         raise
 
 
+def process_images(post_data: dict, story: dict) -> tuple[list[str], Optional[str]]:
+    """Process images for a post: parse prompts, generate Pollinations URLs."""
+    # Parse image prompts from raw response
+    raw_response = post_data.get('raw_response', '')
+    prompts = parse_image_prompts(raw_response)
+
+    if not prompts['image_prompts']:
+        logger.warning('No image prompts found in response')
+        return [], prompts['mermaid']
+
+    # Generate Pollinations URLs directly (they are public and free)
+    image_urls = []
+    for prompt in prompts['image_prompts'][:2]:  # Max 2 images
+        encoded = urllib.parse.quote(prompt)
+        url = f'{POLLINATIONS_BASE}/{encoded}?width=1200&height=675&model=flux&nologo=true'
+        image_urls.append(url)
+        logger.info(f'Generated image URL: {url[:80]}...')
+
+    return image_urls, prompts['mermaid']
+
+
 def main():
     """Main entry point."""
     logger.info('Starting blog content generation')
@@ -328,7 +542,13 @@ def main():
 
         post_data = generate_content(story, prompt_template)
         if post_data:
-            filepath = create_mdx_file(post_data)
+            # Process images
+            image_urls, mermaid_code = process_images(post_data, story)
+
+            # Create MDX file
+            filepath = create_mdx_file(post_data, image_urls, mermaid_code)
+
+            # Git commit and push
             git_commit_and_push(filepath, post_data['title'])
             generated += 1
         else:

@@ -16,6 +16,20 @@ Requisitos:
 - Incluir palabras clave SEO naturales
 - Termina con una conclusión que invite a la reflexión
 
+Después del contenido, genera exactamente este formato (sin espacios extra entre líneas):
+
+IMAGE_PROMPT: [descripción detallada en inglés para una imagen abstracta/artística que represente el tema principal del artículo. Usa estilo cinematográfico, iluminación dramática, colores oscuros con acentos de color púrpura/fucsia. Máximo 80 palabras.]
+
+IMAGE_PROMPT: [segunda imagen, diferente perspectiva o concepto relacionado con el artículo. Misma guía de estilo. Máximo 80 palabras.]
+
+MERMAID: [diagrama Mermaid que muestre relaciones de poder, flujos de capital, o estructuras mencionadas en el artículo. Usa graph TD o flowchart TD. Ejemplo: Google -> Android -> Developers, Google -> Data -> Users. Solo el código, sin explicaciones.]
+
+IMPORTANTE:
+- IMAGE_PROMPT debe ser en inglés, descriptivo, artístico
+- MERMAID debe ser código Mermaid válido y simple (máximo 8 nodos)
+- Solo genera 2 IMAGE_PROMPTs y 1 MERMAID
+- NO agregues explicaciones después de MERMAID
+
 Formato de salida:
 TITLE: [título del artículo]
 DESCRIPTION: [descripción meta de 1-2 oraciones]

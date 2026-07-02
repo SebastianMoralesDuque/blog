@@ -43,6 +43,31 @@ const jsonLd = {
 <BaseLayout title={post.data.title} description={post.data.description} image={post.data.image}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
+  <!-- Mermaid.js for diagrams -->
+  <script type="module">
+    const mermaidDivs = document.querySelectorAll('.mermaid');
+    if (mermaidDivs.length > 0) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+      script.onload = () => {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'dark',
+          themeVariables: {
+            primaryColor: '#d946ef',
+            primaryTextColor: '#ffffff',
+            primaryBorderColor: '#a855f7',
+            lineColor: '#71717a',
+            secondaryColor: '#18181b',
+            tertiaryColor: '#27272a',
+            fontFamily: 'Inter, system-ui, sans-serif',
+          },
+        });
+      };
+      document.head.appendChild(script);
+    }
+  </script>
+
   <article class="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
     <a
       href="/"
@@ -120,4 +145,27 @@ const jsonLd = {
       </div>
     </footer>
   </article>
+
+  <style is:global>
+    .prose .mermaid {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #18181b;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .prose .mermaid svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .prose img {
+      border-radius: 0.75rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+  </style>
 </BaseLayout>
