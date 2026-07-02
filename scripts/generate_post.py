@@ -43,7 +43,7 @@ SITE_URL = os.getenv('SITE_URL', 'https://blog.sebastianmorales.sbs')
 # File Browser configuration
 FILEBROWSER_URL = os.getenv('FILEBROWSER_URL', 'https://files.sebastianmorales.sbs')
 FILEBROWSER_USER = os.getenv('FILEBROWSER_USER', 'sebas')
-FILEBROWSER_PASS = os.getenv('FILEBROWSER_PASS', 'sebashacolico2')
+FILEBROWSER_PASS = os.getenv('FILEBROWSER_PASS', '')
 
 # Pollinations.ai configuration
 POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt'
@@ -64,6 +64,10 @@ RSS_FEEDS = [
 
 def login_filebrowser() -> Optional[str]:
     """Get JWT token from File Browser."""
+    if not FILEBROWSER_USER or not FILEBROWSER_PASS:
+        logger.info('File Browser credentials not configured, skipping')
+        return None
+    
     try:
         resp = requests.post(
             f'{FILEBROWSER_URL}/api/login',
