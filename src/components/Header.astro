@@ -5,7 +5,7 @@ const navItems = [
 ];
 ---
 
-<header class="sticky top-0 z-50 glass">
+<header class="sticky top-0 z-50 glass-strong">
   <nav class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
     <!-- Logo / Site Title -->
     <a href="/" class="flex items-center gap-3 group">
@@ -15,7 +15,7 @@ const navItems = [
         </div>
         <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-brand-500 to-fuchsia-500 blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
       </div>
-      <span class="font-bold text-surface-900 hidden sm:inline tracking-tight">
+      <span class="font-bold text-[rgb(var(--color-text))] hidden sm:inline tracking-tight">
         Crítica Tecnológica
       </span>
     </a>
@@ -25,48 +25,80 @@ const navItems = [
       {navItems.map((item) => (
         <a
           href={item.href}
-          class="px-4 py-2 text-sm font-medium text-surface-600 hover:text-brand-600 rounded-lg hover:bg-brand-50/50 transition-all duration-200"
+          class="px-4 py-2 text-sm font-medium text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-brand))] rounded-lg hover:bg-[rgb(var(--color-brand)/0.05)] transition-all duration-200"
         >
           {item.label}
         </a>
       ))}
       <a
         href="/rss.xml"
-        class="ml-2 p-2 text-surface-400 hover:text-orange-500 rounded-lg hover:bg-orange-50/50 transition-all duration-200"
+        class="ml-2 p-2 text-[rgb(var(--color-text-muted))] hover:text-orange-500 rounded-lg hover:bg-orange-500/10 transition-all duration-200"
         aria-label="RSS Feed"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
         </svg>
       </a>
+
+      <!-- Theme Toggle -->
+      <button
+        id="theme-toggle"
+        class="ml-2 p-2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-brand))] rounded-lg hover:bg-[rgb(var(--color-brand)/0.05)] transition-all duration-200"
+        aria-label="Cambiar tema"
+      >
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
     </div>
 
     <!-- Mobile Menu Button -->
-    <button
-      id="mobile-menu-button"
-      class="md:hidden p-2 text-surface-600 hover:text-surface-900 rounded-lg hover:bg-surface-100 transition-colors"
-      aria-label="Abrir menú"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
+    <div class="flex items-center gap-2 md:hidden">
+      <!-- Mobile Theme Toggle -->
+      <button
+        id="theme-toggle-mobile"
+        class="p-2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-brand))] rounded-lg hover:bg-[rgb(var(--color-brand)/0.05)] transition-all duration-200"
+        aria-label="Cambiar tema"
+      >
+        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+
+      <button
+        id="mobile-menu-button"
+        class="p-2 text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text))] rounded-lg hover:bg-[rgb(var(--color-surface))] transition-colors"
+        aria-label="Abrir menú"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile Navigation -->
-  <div id="mobile-menu" class="hidden md:hidden border-t border-surface-200/50 bg-white/80 backdrop-blur-xl">
+  <div id="mobile-menu" class="hidden md:hidden border-t border-[rgb(var(--color-border-subtle))] bg-[rgb(var(--glass-bg)/0.95)] backdrop-blur-xl">
     <div class="px-4 py-3 space-y-1">
       {navItems.map((item) => (
         <a
           href={item.href}
-          class="block px-4 py-2.5 text-sm font-medium text-surface-600 hover:text-brand-600 hover:bg-brand-50/50 rounded-lg transition-all duration-200"
+          class="block px-4 py-2.5 text-sm font-medium text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-brand))] hover:bg-[rgb(var(--color-brand)/0.05)] rounded-lg transition-all duration-200"
         >
           {item.label}
         </a>
       ))}
       <a
         href="/rss.xml"
-        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-surface-400 hover:text-orange-500 hover:bg-orange-50/50 rounded-lg transition-all duration-200"
+        class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-orange-500 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
@@ -78,17 +110,70 @@ const navItems = [
 </header>
 
 <script>
-  const button = document.getElementById('mobile-menu-button');
-  const menu = document.getElementById('mobile-menu');
+  // Theme toggle functionality
+  function initThemeToggle() {
+    const theme = localStorage.getItem('theme') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-  button?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
-  });
+    function setTheme(newTheme: string) {
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('theme', newTheme);
 
-  // Close menu when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!button?.contains(e.target as Node) && !menu?.contains(e.target as Node)) {
-      menu?.classList.add('hidden');
+      // Update theme-color meta tag
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', newTheme === 'dark' ? '#09090b' : '#fafafa');
+      }
     }
+
+    // Toggle buttons
+    const toggleButtons = [
+      document.getElementById('theme-toggle'),
+      document.getElementById('theme-toggle-mobile')
+    ];
+
+    toggleButtons.forEach(btn => {
+      btn?.addEventListener('click', () => {
+        const current = localStorage.getItem('theme') || 
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    });
+
+    // Listen for system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+  }
+
+  // Mobile menu
+  function initMobileMenu() {
+    const button = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+
+    button?.addEventListener('click', () => {
+      menu?.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!button?.contains(e.target as Node) && !menu?.contains(e.target as Node)) {
+        menu?.classList.add('hidden');
+      }
+    });
+  }
+
+  initThemeToggle();
+  initMobileMenu();
+
+  // Re-initialize after View Transitions
+  document.addEventListener('astro:after-swap', () => {
+    initThemeToggle();
+    initMobileMenu();
   });
 </script>

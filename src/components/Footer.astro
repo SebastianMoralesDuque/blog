@@ -22,40 +22,40 @@ const socialLinks = [
 
 <footer class="relative mt-auto">
   <!-- Top gradient line -->
-  <div class="h-px bg-gradient-to-r from-transparent via-brand-300/50 to-transparent"></div>
+  <div class="h-px bg-gradient-to-r from-transparent via-[rgb(var(--color-brand)/0.3)] to-transparent"></div>
 
   <div class="glass border-t-0 rounded-none">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Brand -->
         <div class="md:col-span-1">
-          <a href="/" class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-brand-500/20">
+          <a href="/" class="flex items-center gap-3 mb-4 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-all duration-300">
               CT
             </div>
-            <span class="font-bold text-surface-900 tracking-tight">Crítica Tecnológica</span>
+            <span class="font-bold text-[rgb(var(--color-text))] tracking-tight">Crítica Tecnológica</span>
           </a>
-          <p class="text-sm text-surface-500 leading-relaxed max-w-xs">
+          <p class="text-sm text-[rgb(var(--color-text-secondary))] leading-relaxed max-w-xs">
             Análisis diario de tecnología desde la perspectiva del materialismo histórico.
           </p>
         </div>
 
         <!-- Navigation -->
         <div class="md:col-span-1">
-          <h3 class="text-sm font-semibold text-surface-900 mb-4 uppercase tracking-wider">Navegación</h3>
-          <ul class="space-y-2">
+          <h3 class="text-sm font-semibold text-[rgb(var(--color-text))] mb-4 uppercase tracking-wider">Navegación</h3>
+          <ul class="space-y-2.5">
             <li>
-              <a href="/" class="text-sm text-surface-500 hover:text-brand-600 transition-colors duration-200">
+              <a href="/" class="text-sm text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-brand))] transition-colors duration-200 animated-underline">
                 Inicio
               </a>
             </li>
             <li>
-              <a href="/about" class="text-sm text-surface-500 hover:text-brand-600 transition-colors duration-200">
+              <a href="/about" class="text-sm text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-brand))] transition-colors duration-200 animated-underline">
                 Sobre mí
               </a>
             </li>
             <li>
-              <a href="/rss.xml" class="text-sm text-surface-500 hover:text-orange-500 transition-colors duration-200">
+              <a href="/rss.xml" class="text-sm text-[rgb(var(--color-text-secondary))] hover:text-orange-500 transition-colors duration-200 animated-underline">
                 RSS Feed
               </a>
             </li>
@@ -64,14 +64,14 @@ const socialLinks = [
 
         <!-- Social -->
         <div class="md:col-span-1">
-          <h3 class="text-sm font-semibold text-surface-900 mb-4 uppercase tracking-wider">Conecta</h3>
-          <div class="flex items-center gap-3">
+          <h3 class="text-sm font-semibold text-[rgb(var(--color-text))] mb-4 uppercase tracking-wider">Conecta</h3>
+          <div class="flex items-center gap-2">
             {socialLinks.map((link) => (
               <a
                 href={link.href}
                 target={link.href.startsWith('mailto') ? undefined : '_blank'}
                 rel={link.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
-                class="p-2.5 text-surface-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200"
+                class="p-2.5 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-brand))] hover:bg-[rgb(var(--color-brand)/0.05)] rounded-xl transition-all duration-200"
                 aria-label={link.label}
               >
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -84,12 +84,12 @@ const socialLinks = [
       </div>
 
       <!-- Bottom bar -->
-      <div class="mt-10 pt-6 border-t border-surface-200/50">
+      <div class="mt-10 pt-6 border-t border-[rgb(var(--color-border-subtle))]">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p class="text-xs text-surface-400">
+          <p class="text-xs text-[rgb(var(--color-text-muted))]">
             © {currentYear} Sebastian Morales. Todos los derechos reservados.
           </p>
-          <p class="text-xs text-surface-400">
+          <p class="text-xs text-[rgb(var(--color-text-muted))]">
             Hecho con <span class="text-brand-500">♥</span> y materialismo histórico
           </p>
         </div>

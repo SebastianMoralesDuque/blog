@@ -1,0 +1,35 @@
+name: Deploy to Coolify
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  COOLIFY_URL: http://89.117.58.33:8000
+  COOLIFY_APP_UUID: zzhjq78rmhdl4aw6d0vdn3rz
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Coolify
+        run: |
+          echo "Triggering Coolify deployment..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "${COOLIFY_URL}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}&force=true" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+          
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Deployment queued successfully"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
