@@ -5,21 +5,16 @@ on:
     branches:
       - main
 
-env:
-  COOLIFY_URL: http://89.117.58.33:8000
-  COOLIFY_APP_UUID: zzhjq78rmhdl4aw6d0vdn3rz
-
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Coolify
+      - name: Trigger deployment
         run: |
-          echo "Triggering Coolify deployment..."
+          echo "Triggering deployment via webhook..."
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "${COOLIFY_URL}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}&force=true" \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}")
+            "http://143.47.45.158:9000/deploy")
           
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
@@ -33,4 +28,3 @@ jobs:
             echo "❌ Deployment failed"
             exit 1
           fi
-
