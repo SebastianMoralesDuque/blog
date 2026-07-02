@@ -247,10 +247,12 @@ def create_mdx_file(post_data: dict) -> Path:
     # Ensure directory exists
     BLOG_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Create MDX content
+    # Create MDX content — escape inner quotes for valid YAML
+    safe_title = post_data['title'].replace('"', '\\"')
+    safe_desc = post_data['description'].replace('"', '\\"')
     frontmatter = f"""---
-title: "{post_data['title']}"
-description: "{post_data['description']}"
+title: "{safe_title}"
+description: "{safe_desc}"
 pubDate: {now.isoformat()}
 author: "Sebastian Morales"
 tags: {json.dumps(post_data['tags'])}
