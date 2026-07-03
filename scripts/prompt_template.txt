@@ -18,9 +18,15 @@ Requisitos:
 
 Después del contenido, genera exactamente este formato (sin espacios extra entre líneas):
 
-IMAGE_PROMPT: [descripción detallada en inglés para una imagen abstracta/artística que represente el tema principal del artículo. Usa estilo cinematográfico, iluminación dramática, colores oscuros con acentos de color púrpura/fucsia. Máximo 80 palabras.]
+IMAGE_PROMPT: [descripción en inglés de una imagen que represente visualmente el tema del artículo. Elige UNO de estos estilos según lo que mejor encaje con el tema:
+- "editorial photography": foto limpia, fondos neutros, composición profesional
+- "minimalist illustration": ilustración plana, colores limitados, formas geométricas simples
+- "abstract data visualization": gráficos de datos estilizados, nodos, flujos, patrones
+- "conceptual photography": escena real con un elemento simbólico que represente la idea central
+- "dark tech aesthetic": tonos oscuros, acentos de un solo color, look industrial
+Describe la escena de forma concreta y visual. Máximo 60 palabras.]
 
-IMAGE_PROMPT: [segunda imagen, diferente perspectiva o concepto relacionado con el artículo. Misma guía de estilo. Máximo 80 palabras.]
+IMAGE_PROMPT: [segunda imagen con una perspectiva diferente. Usa un estilo distinto al de la primera imagen. Describe algo concreto y visual, no abstracto. Máximo 60 palabras.]
 
 MERMAID: [diagrama Mermaid que muestre relaciones de poder, flujos de capital, o estructuras mencionadas en el artículo. Usa graph TD o flowchart TD. Ejemplo: Google -> Android -> Developers, Google -> Data -> Users. Solo el código, sin explicaciones.]
 

@@ -484,6 +484,23 @@
   height: 12rem;
 }
 
+/* Mermaid diagrams */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Hero parallax via CSS scroll-driven animations */
 @supports (animation-timeline: scroll()) {
   .hero-parallax {

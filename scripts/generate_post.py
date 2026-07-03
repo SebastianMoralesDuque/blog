@@ -513,7 +513,8 @@ def process_images(post_data: dict, story: dict) -> tuple[list[str], Optional[st
     image_urls = []
     for prompt in prompts['image_prompts'][:2]:  # Max 2 images
         encoded = urllib.parse.quote(prompt)
-        url = f'{POLLINATIONS_BASE}/{encoded}?width=1200&height=675&model=flux&nologo=true'
+        seed = hash(prompt) % 100000
+        url = f'{POLLINATIONS_BASE}/{encoded}?width=1200&height=675&model=flux&nologo=true&seed={seed}'
         image_urls.append(url)
         logger.info(f'Generated image URL: {url[:80]}...')
 
