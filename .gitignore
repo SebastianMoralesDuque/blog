@@ -12,11 +12,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+blog-generation.log
 
-# environment variables
+# environment variables and secrets
 .env
-.env.production
-.env.local
+.env.*
+!.env.example
+credentials.json
+secrets/
+*.pem
+*.key
 
 # os files
 .DS_Store
