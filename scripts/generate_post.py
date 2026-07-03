@@ -425,6 +425,155 @@ def parse_generated_content(text: str) -> Optional[dict]:
         return None
 
 
+def validate_post(post_data: dict) -> dict:
+    """Programmatic validation. Returns {valid, issues, fixed}."""
+    issues = []
+    fixed = dict(post_data)
+
+    # Check for CJK characters
+    cjk_chars = re.findall(r'[\u4e00-\u9fff\u3400-\u4dbf]', post_data['content'])
+    if cjk_chars:
+        issues.append(f'Found {len(cjk_chars)} CJK characters in content')
+
+    # Check title is not empty
+    if not post_data.get('title', '').strip():
+        issues.append('Title is empty')
+
+    # Check description is not empty
+    if not post_data.get('description', '').strip():
+        issues.append('Description is empty')
+
+    # Check content length
+    word_count = len(post_data.get('content', '').split())
+    if word_count < 200:
+        issues.append(f'Content too short: {word_count} words')
+    elif word_count > 2000:
+        issues.append(f'Content too long: {word_count} words')
+
+    # Check tags
+    if not post_data.get('tags'):
+        fixed['tags'] = ['tecnología', 'análisis', 'industria']
+        issues.append('Tags empty, using defaults')
+
+    logger.info(f'Validation: {len(issues)} issues found')
+    return {
+        'valid': len(issues) == 0 or (len(issues) == 1 and 'CJK characters' not in issues[0]),
+        'issues': issues,
+        'fixed': fixed,
+    }
+
+
+def review_post(post_data: dict) -> dict:
+    """LLM-based review. Returns corrections."""
+    review_prompt = """Eres un editor profesional de contenido en español. Revisa este artículo de blog y corrige cualquier problema.
+
+Problemas a buscar y corregir:
+1. Caracteres en otros idiomas (chino, japonés, etc.) mezclados con español → reemplaza por la traducción correcta al español
+2. Gramática y ortografía incorrectas
+3. Contenido incoherente o repetitivo
+4. Formato MDX roto (etiquetas mal cerradas, etc.)
+5. Tags que no sean relevantes al contenido
+
+IMPORTANTE:
+- Solo corrige si hay problemas reales
+- Si el artículo está bien, devuelve "valid": true sin cambios
+- El contenido DEBE permanecer en español
+- NO cambies el estilo ni el tono del análisis
+
+Devuelve ÚNICAMENTE un JSON válido (sin markdown, sin explicaciones):
+{
+  "valid": true/false,
+  "issues": ["problema 1", "problema 2"],
+  "corrected_title": "título corregido solo si era necesario",
+  "corrected_description": "descripción corregida solo si era necesaria",
+  "corrected_content": "contenido corregido solo si era necesario",
+  "corrected_tags": ["tags"] solo si era necesario
+}
+
+Si no hay correcciones, devuelve: {"valid": true, "issues": [], "corrected_title": null, "corrected_description": null, "corrected_content": null, "corrected_tags": null}
+
+ARTÍCULO:
+TITLE: {title}
+DESCRIPTION: {description}
+TAGS: {tags}
+CONTENT: {content}"""
+
+    prompt = review_prompt.format(
+        title=post_data['title'],
+        description=post_data['description'],
+        tags=', '.join(post_data.get('tags', [])),
+        content=post_data['content'],
+    )
+
+    try:
+        resp = requests.post(
+            f'{OLLAMA_BASE_URL}/api/generate',
+            json={
+                'model': OLLAMA_MODEL,
+                'prompt': prompt,
+                'stream': False,
+            },
+            timeout=180,
+        )
+        resp.raise_for_status()
+        response_text = resp.json().get('response', '')
+
+        if not response_text:
+            logger.warning('Empty review response, skipping review')
+            return {'valid': True, 'issues': []}
+
+        # Parse JSON from response
+        # Try to extract JSON from the response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            review_result = json.loads(json_match.group())
+            logger.info(f'Review: valid={review_result.get("valid")}, issues={len(review_result.get("issues", []))}')
+            return review_result
+        else:
+            logger.warning('Could not parse review JSON, skipping review')
+            return {'valid': True, 'issues': []}
+
+    except Exception as e:
+        logger.error(f'Review failed: {e}')
+        return {'valid': True, 'issues': []}
+
+
+def generate_content_with_review(story: dict, prompt_template: str) -> Optional[dict]:
+    """Generate content with validation and LLM review."""
+    post_data = generate_content(story, prompt_template)
+    if not post_data:
+        return None
+
+    # Step 1: Programmatic validation
+    validation = validate_post(post_data)
+    post_data = validation['fixed']
+
+    if not validation['valid']:
+        logger.warning(f'Post rejected by validation: {validation["issues"]}')
+        return None
+
+    # Step 2: LLM review and corrections
+    review = review_post(post_data)
+
+    if review.get('corrected_title'):
+        logger.info(f'Review: correcting title')
+        post_data['title'] = review['corrected_title']
+    if review.get('corrected_description'):
+        logger.info(f'Review: correcting description')
+        post_data['description'] = review['corrected_description']
+    if review.get('corrected_content'):
+        logger.info(f'Review: correcting content ({len(review["corrected_content"])} chars)')
+        post_data['content'] = review['corrected_content']
+    if review.get('corrected_tags'):
+        logger.info(f'Review: correcting tags')
+        post_data['tags'] = review['corrected_tags']
+
+    if review.get('issues'):
+        logger.info(f'Review issues: {review["issues"]}')
+
+    return post_data
+
+
 def create_mdx_file(post_data: dict, image_urls: list[str], mermaid_code: Optional[str]) -> Path:
     """Create MDX file for the blog post."""
     now = datetime.now(timezone.utc)
@@ -545,7 +694,7 @@ def main():
     for story in selected[:2]:
         logger.info(f'Generating post for: {story["title"]}')
 
-        post_data = generate_content(story, prompt_template)
+        post_data = generate_content_with_review(story, prompt_template)
         if post_data:
             # Process images
             image_urls, mermaid_code = process_images(post_data, story)

@@ -18,21 +18,26 @@ Requisitos:
 
 Después del contenido, genera exactamente este formato (sin espacios extra entre líneas):
 
-IMAGE_PROMPT: [descripción en inglés de una imagen que represente visualmente el tema del artículo. Elige UNO de estos estilos según lo que mejor encaje con el tema:
-- "editorial photography": foto limpia, fondos neutros, composición profesional
-- "minimalist illustration": ilustración plana, colores limitados, formas geométricas simples
-- "abstract data visualization": gráficos de datos estilizados, nodos, flujos, patrones
-- "conceptual photography": escena real con un elemento simbólico que represente la idea central
-- "dark tech aesthetic": tonos oscuros, acentos de un solo color, look industrial
-Describe la escena de forma concreta y visual. Máximo 60 palabras.]
+IMAGE_PROMPT: [descripción en inglés de una imagen para el artículo. Elige UNO de estos estilos:
+- "editorial": foto profesional, fondos neutros, composición limpia. Ejemplo: "A clean editorial photo of a data center hallway with soft natural lighting, server racks receding into perspective, neutral gray tones"
+- "minimalist": ilustración plana, pocos colores, formas simples. Ejemplo: "A minimalist flat illustration of a smartphone with a small lock icon, simple geometric shapes, muted blue and gray palette"
+- "conceptual": foto real con un elemento simbólico sutil. Ejemplo: "A close-up of a hand holding a smartphone showing a generic app interface, shallow depth of field, warm natural light from a window"
+- "abstract": patrones o formas que sugieran el tema sin ser literal. Ejemplo: "An abstract pattern of interconnected dots and lines on a white background, suggesting a network, clean and minimal"
 
-IMAGE_PROMPT: [segunda imagen con una perspectiva diferente. Usa un estilo distinto al de la primera imagen. Describe algo concreto y visual, no abstracto. Máximo 60 palabras.]
+PROHIBIDO: usar "purple", "fuchsia", "neon", "cyberpunk", "dystopian", "dark cinematic", "chiaroscuro", "glow", "glowing". 
+Describe escenas concretas y realistas. Máximo 40 palabras.]
 
-MERMAID: [diagrama Mermaid que muestre relaciones de poder, flujos de capital, o estructuras mencionadas en el artículo. Usa graph TD o flowchart TD. Ejemplo: Google -> Android -> Developers, Google -> Data -> Users. Solo el código, sin explicaciones.]
+IMAGE_PROMPT: [segunda imagen con estilo distinto al de la primera. Algo concreto y realista. Máximo 40 palabras.]
+
+MERMAID: [diagrama simple que muestre una relación clave del artículo. Máximo 5 nodos. Ejemplos de buenos diagramas:
+- Google -> Android -> Developers
+- IBM -> Red Hat -> Podman
+- Company A -> acquires -> Company B
+Usa graph LR. Solo el código, sin explicaciones.]
 
 IMPORTANTE:
-- IMAGE_PROMPT debe ser en inglés, descriptivo, artístico
-- MERMAID debe ser código Mermaid válido y simple (máximo 8 nodos)
+- IMAGE_PROMPT debe ser en inglés, concreto, realista
+- MERMAID debe tener máximo 5 nodos
 - Solo genera 2 IMAGE_PROMPTs y 1 MERMAID
 - NO agregues explicaciones después de MERMAID
 
