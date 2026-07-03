@@ -304,7 +304,7 @@ def load_prompt_template() -> str:
         return PROMPT_TEMPLATE_PATH.read_text()
     else:
         # Default prompt
-        return """Eres un analista de tecnología con formación en materialismo histórico.
+        return """Eres un analista de tecnología independiente.
 Escribe un artículo de blog sobre esta noticia tecnológica.
 
 Título de la noticia: {title}
@@ -313,11 +313,11 @@ Contexto: {context}
 
 Requisitos:
 - Título llamativo pero preciso (8-15 palabras)
-- Análisis crítico desde el materialismo marxista
-- Enfoque en relaciones de poder, propiedad de medios de producción, explotación laboral, concentración de capital
+- Análisis crítico de la industria tecnológica
+- Enfoque en relaciones de poder, concentración de capital, y dinámicas económicas reales
 - Menciona empresas específicas y sus estructuras de poder
-- Conecta con tendencias históricas del capitalismo
-- Tono: riguroso pero accesible
+- Conecta con tendencias históricas de la industria
+- Tono: riguroso pero accesible, como un periodista independiente
 - 800-1200 palabras
 - Incluir palabras clave SEO naturales
 - Termina con una conclusión que invite a la reflexión
@@ -407,7 +407,7 @@ def parse_generated_content(text: str) -> Optional[dict]:
         # Parse tags
         tags = [t.strip() for t in tags_str.split(',') if t.strip()]
         if not tags:
-            tags = ['tecnología', 'análisis', 'materialismo']
+            tags = ['tecnología', 'análisis', 'industria']
 
         # Generate slug from title
         slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')

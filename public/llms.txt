@@ -1,24 +1,24 @@
 # Crítica Tecnológica
 
-> Análisis crítico de tecnología desde la perspectiva del materialismo histórico. Publicaciones diarias sobre noticias tech con enfoque en relaciones de poder, propiedad de medios de producción y concentración de capital.
+> Análisis crítico de tecnología, poder y estructuras económicas. Publicaciones diarias sobre noticias tech con enfoque en relaciones de poder, propiedad de medios de producción y concentración de capital.
 
 ## About
 
-Blog personal de Sebastian Morales. Análisis riguroso pero accesible de la industria tecnológica usando el marco teórico del materialismo marxista. Cada artículo examina las dinámicas de poder, explotación laboral y acumulación de capital detrás de las noticias tech.
+Blog personal de Sebastian Morales. Análisis riguroso pero accesible de la industria tecnológica. Cada artículo examina las dinámicas de poder, estructuras económicas y concentración de capital detrás de las noticias tech.
 
 ## Content
 
 - Publicaciones diarias (2 posts por día)
-- Análisis crítico desde el materialismo marxista
+- Análisis crítico de la industria tecnológica
 - Noticias actuales del sector tecnológico
 - Enfoque en relaciones de poder y propiedad
 
 ## Author
 
 Sebastian Morales — Desarrollador Full Stack
-- LinkedIn: https://linkedin.com/in/sebastianmorales
-- GitHub: https://github.com/sebastianmorales
-- Email: dev@sebastianmorales.sbs
+- LinkedIn: https://www.linkedin.com/in/sebas-dev/
+- GitHub: https://github.com/SebastianMoralesDuque
+- Portafolio: https://portafolio.sebastianmorales.sbs/
 
 ## Optional
 

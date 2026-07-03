@@ -9,7 +9,7 @@ export async function GET(context: APIContext) {
 
   return rss({
     title: 'Crítica Tecnológica',
-    description: 'Análisis crítico de tecnología desde el materialismo histórico',
+    description: 'Análisis crítico de tecnología, poder y estructuras económicas',
     site: context.site!,
     items: posts.map((post) => ({
       title: post.data.title,
