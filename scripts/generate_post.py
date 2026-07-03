@@ -439,8 +439,8 @@ def create_mdx_file(post_data: dict, image_urls: list[str], mermaid_code: Option
     safe_title = post_data['title'].replace('"', '\\"')
     safe_desc = post_data['description'].replace('"', '\\"')
 
-    # Use first image as OG image
-    og_image = image_urls[0] if image_urls else ''
+    # Use first image as OG image, fallback to default
+    og_image = image_urls[0] if image_urls else DEFAULT_IMAGE
 
     frontmatter = f"""---
 title: "{safe_title}"
@@ -506,8 +506,8 @@ def process_images(post_data: dict, story: dict) -> tuple[list[str], Optional[st
     prompts = parse_image_prompts(raw_response)
 
     if not prompts['image_prompts']:
-        logger.warning('No image prompts found in response')
-        return [], prompts['mermaid']
+        logger.warning('No image prompts found, using default fallback image')
+        return [DEFAULT_IMAGE], prompts['mermaid']
 
     # Generate Pollinations URLs directly (they are public and free)
     image_urls = []

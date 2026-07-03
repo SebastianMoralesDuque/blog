@@ -501,6 +501,15 @@
   height: auto;
 }
 
+/* Image fallback state */
+.prose-custom img {
+  transition: opacity 0.3s ease;
+}
+
+.prose-custom img[src=""] {
+  display: none;
+}
+
 /* Hero parallax via CSS scroll-driven animations */
 @supports (animation-timeline: scroll()) {
   .hero-parallax {

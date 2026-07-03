@@ -182,6 +182,25 @@ const jsonLd = {
     </footer>
   </article>
 
+  <!-- Image fallback for broken Pollinations URLs -->
+  <script>
+    function setupImageFallbacks() {
+      const FALLBACK = '/og-default.png';
+      document.querySelectorAll('.prose-custom img').forEach((img) => {
+        if (img.dataset.fallback) return;
+        img.dataset.fallback = 'true';
+        img.addEventListener('error', () => {
+          if (img.src !== FALLBACK) {
+            img.src = FALLBACK;
+            img.alt = 'Imagen no disponible';
+          }
+        });
+      });
+    }
+    setupImageFallbacks();
+    document.addEventListener('astro:page-load', setupImageFallbacks);
+  </script>
+
   <script>
     // Reading progress bar
     function updateReadingProgress() {
