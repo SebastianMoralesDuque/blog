@@ -11,7 +11,6 @@ import json
 import re
 import subprocess
 import logging
-import time
 import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,11 +22,12 @@ import feedparser
 # Paths (must be before logging)
 PROJECT_ROOT = Path(__file__).parent.parent
 
-# Configure logging
+# Configure logging (force=True clears stale handlers on re-import)
 LOG_PATH = os.getenv('BLOG_LOG_PATH', str(PROJECT_ROOT / 'blog-generation.log'))
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
+    force=True,
     handlers=[
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_PATH, mode='a'),
@@ -39,11 +39,6 @@ logger = logging.getLogger(__name__)
 OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'minimax-m3:cloud')
 SITE_URL = os.getenv('SITE_URL', 'https://blog.sebastianmorales.sbs')
-
-# File Browser configuration
-FILEBROWSER_URL = os.getenv('FILEBROWSER_URL', 'https://files.sebastianmorales.sbs')
-FILEBROWSER_USER = os.getenv('FILEBROWSER_USER', 'sebas')
-FILEBROWSER_PASS = os.getenv('FILEBROWSER_PASS', '')
 
 # Pollinations.ai configuration
 POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt'
@@ -60,95 +55,6 @@ RSS_FEEDS = [
     'https://www.theverge.com/rss/index.xml',
     'https://feeds.arstechnica.com/arstechnica/index',
 ]
-
-
-def login_filebrowser() -> Optional[str]:
-    """Get JWT token from File Browser."""
-    if not FILEBROWSER_USER or not FILEBROWSER_PASS:
-        logger.info('File Browser credentials not configured, skipping')
-        return None
-    
-    try:
-        resp = requests.post(
-            f'{FILEBROWSER_URL}/api/login',
-            json={
-                'username': FILEBROWSER_USER,
-                'password': FILEBROWSER_PASS,
-            },
-            timeout=10,
-        )
-        resp.raise_for_status()
-        token = resp.text.strip().strip('"')
-        logger.info('Logged in to File Browser')
-        return token
-    except Exception as e:
-        logger.error(f'Failed to login to File Browser: {e}')
-        return None
-
-
-def download_pollinations_image(prompt: str, output_path: str, width: int = 1200, height: int = 675) -> bool:
-    """Download image from Pollinations.ai with retry."""
-    encoded_prompt = urllib.parse.quote(prompt)
-    url = f'{POLLINATIONS_BASE}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true'
-
-    for attempt in range(3):
-        try:
-            logger.info(f'Downloading image from Pollinations (attempt {attempt + 1})')
-            resp = requests.get(url, timeout=60, stream=True)
-            resp.raise_for_status()
-
-            with open(output_path, 'wb') as f:
-                for chunk in resp.iter_content(chunk_size=8192):
-                    f.write(chunk)
-
-            file_size = os.path.getsize(output_path)
-            if file_size > 1000:  # At least 1KB
-                logger.info(f'Downloaded image: {output_path} ({file_size} bytes)')
-                return True
-            else:
-                logger.warning(f'Downloaded file too small: {file_size} bytes')
-                os.remove(output_path)
-
-        except Exception as e:
-            logger.warning(f'Pollinations download attempt {attempt + 1} failed: {e}')
-            if attempt < 2:
-                time.sleep(5)
-
-    # Fallback to default image
-    logger.warning('Using default fallback image')
-    try:
-        resp = requests.get(DEFAULT_IMAGE, timeout=30, stream=True)
-        resp.raise_for_status()
-        with open(output_path, 'wb') as f:
-            for chunk in resp.iter_content(chunk_size=8192):
-                f.write(chunk)
-        return True
-    except Exception as e:
-        logger.error(f'Failed to download fallback image: {e}')
-        return False
-
-
-def upload_to_filebrowser(local_path: str, remote_path: str, token: str) -> Optional[str]:
-    """Upload image to File Browser. Returns public URL."""
-    try:
-        with open(local_path, 'rb') as f:
-            file_data = f.read()
-
-        resp = requests.post(
-            f'{FILEBROWSER_URL}/api/resources/{remote_path}?override=true',
-            headers={'X-Auth': token},
-            data=file_data,
-            timeout=30,
-        )
-        resp.raise_for_status()
-
-        public_url = f'{FILEBROWSER_URL}/files/{remote_path}'
-        logger.info(f'Uploaded to File Browser: {public_url}')
-        return public_url
-
-    except Exception as e:
-        logger.error(f'Failed to upload to File Browser: {e}')
-        return None
 
 
 def parse_image_prompts(text: str) -> dict:
@@ -397,9 +303,11 @@ def parse_generated_content(text: str) -> Optional[dict]:
         content = re.sub(r'\n?```mermaid\n.*?\n```\n?', '\n', content, flags=re.DOTALL)
         
         # Also remove mermaid code without fences (sometimes LLM includes raw mermaid)
-        # Remove any line that contains --> (mermaid arrow syntax)
+        # Remove lines that are clearly mermaid arrow syntax (A --> B, A -.-> B, etc.)
+        # but preserve lines that merely mention --> in prose (e.g. HTML comments)
+        mermaid_arrow_re = re.compile(r'^\s*\w[\w\s]*\s*[-.=>]+\s*\w')
         lines = content.split('\n')
-        lines = [line for line in lines if '-->' not in line]
+        lines = [line for line in lines if not mermaid_arrow_re.match(line)]
         content = '\n'.join(lines)
         
         content = content.strip()
@@ -465,6 +373,8 @@ def validate_post(post_data: dict) -> dict:
 
 def review_post(post_data: dict) -> dict:
     """LLM-based review. Returns corrections."""
+    # NOTE: literal curly braces in JSON examples are escaped as {{ and }}
+    # so Python .format() does not treat them as placeholders.
     review_prompt = """Eres un editor profesional de contenido en español. Revisa este artículo de blog y corrige cualquier problema.
 
 Problemas a buscar y corregir:
@@ -481,16 +391,16 @@ IMPORTANTE:
 - NO cambies el estilo ni el tono del análisis
 
 Devuelve ÚNICAMENTE un JSON válido (sin markdown, sin explicaciones):
-{
+{{
   "valid": true/false,
   "issues": ["problema 1", "problema 2"],
   "corrected_title": "título corregido solo si era necesario",
   "corrected_description": "descripción corregida solo si era necesaria",
   "corrected_content": "contenido corregido solo si era necesario",
   "corrected_tags": ["tags"] solo si era necesario
-}
+}}
 
-Si no hay correcciones, devuelve: {"valid": true, "issues": [], "corrected_title": null, "corrected_description": null, "corrected_content": null, "corrected_tags": null}
+Si no hay correcciones, devuelve: {{"valid": true, "issues": [], "corrected_title": null, "corrected_description": null, "corrected_content": null, "corrected_tags": null}}
 
 ARTÍCULO:
 TITLE: {title}
@@ -634,6 +544,14 @@ def git_commit_and_push(filepath: Path, title: str):
             capture_output=True,
         )
 
+        # Pull with rebase first (prevents push rejection if VPS cron already pushed)
+        subprocess.run(
+            ['git', 'pull', '--rebase', 'origin', 'main'],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+        )
+
         # Push
         subprocess.run(
             ['git', 'push', 'origin', 'main'],
@@ -648,19 +566,31 @@ def git_commit_and_push(filepath: Path, title: str):
         raise
 
 
+FORBIDDEN_IMAGE_TERMS = ['purple', 'fuchsia', 'neon', 'cyberpunk', 'dystopian', 'dark cinematic', 'chiaroscuro', 'glow', 'glowing']
+
+
 def process_images(post_data: dict, story: dict) -> tuple[list[str], Optional[str]]:
     """Process images for a post: parse prompts, generate Pollinations URLs."""
     # Parse image prompts from raw response
     raw_response = post_data.get('raw_response', '')
     prompts = parse_image_prompts(raw_response)
 
-    if not prompts['image_prompts']:
-        logger.warning('No image prompts found, using default fallback image')
+    # Filter out prompts with forbidden terms (match prompt_template.txt rules)
+    filtered_prompts = []
+    for prompt in prompts['image_prompts']:
+        lower = prompt.lower()
+        if any(term in lower for term in FORBIDDEN_IMAGE_TERMS):
+            logger.warning(f'Rejected image prompt (forbidden term): {prompt[:60]}...')
+            continue
+        filtered_prompts.append(prompt)
+
+    if not filtered_prompts:
+        logger.warning('No valid image prompts after filtering, using default fallback image')
         return [DEFAULT_IMAGE], prompts['mermaid']
 
     # Generate Pollinations URLs directly (they are public and free)
     image_urls = []
-    for prompt in prompts['image_prompts'][:2]:  # Max 2 images
+    for prompt in filtered_prompts[:2]:  # Max 2 images
         encoded = urllib.parse.quote(prompt)
         seed = hash(prompt) % 100000
         url = f'{POLLINATIONS_BASE}/{encoded}?width=1200&height=675&model=flux&nologo=true&seed={seed}'
@@ -694,19 +624,30 @@ def main():
     for story in selected[:2]:
         logger.info(f'Generating post for: {story["title"]}')
 
-        post_data = generate_content_with_review(story, prompt_template)
-        if post_data:
-            # Process images
-            image_urls, mermaid_code = process_images(post_data, story)
+        try:
+            post_data = generate_content_with_review(story, prompt_template)
+            if post_data:
+                # Idempotency check: skip if a post with this slug already exists
+                date_str = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+                expected_filename = f"{date_str}-{post_data['slug']}.mdx"
+                if (BLOG_CONTENT_DIR / expected_filename).exists():
+                    logger.warning(f'Post already exists, skipping: {expected_filename}')
+                    continue
 
-            # Create MDX file
-            filepath = create_mdx_file(post_data, image_urls, mermaid_code)
+                # Process images
+                image_urls, mermaid_code = process_images(post_data, story)
 
-            # Git commit and push
-            git_commit_and_push(filepath, post_data['title'])
-            generated += 1
-        else:
-            logger.warning(f'Failed to generate content for: {story["title"]}')
+                # Create MDX file
+                filepath = create_mdx_file(post_data, image_urls, mermaid_code)
+
+                # Git commit and push
+                git_commit_and_push(filepath, post_data['title'])
+                generated += 1
+            else:
+                logger.warning(f'Failed to generate content for: {story["title"]}')
+        except Exception as e:
+            logger.error(f'Error processing story "{story["title"]}": {e}', exc_info=True)
+            continue
 
     logger.info(f'Generation complete. Created {generated} posts.')
     return generated
