@@ -649,8 +649,79 @@ def main():
             logger.error(f'Error processing story "{story["title"]}": {e}', exc_info=True)
             continue
 
+    if generated > 0:
+        rebuild_container()
+
     logger.info(f'Generation complete. Created {generated} posts.')
     return generated
+
+
+def rebuild_container():
+    """Rebuild Docker image and restart the blog container after new posts."""
+    CONTAINER_NAME = 't7uiqlyznon79xi2i7pb3-211232135618'
+    IMAGE_NAME = 'blog:latest'
+    try:
+        logger.info('Rebuilding Docker container for deployment...')
+        subprocess.run(
+            ['docker', 'build', '-t', IMAGE_NAME, '.'],
+            cwd=PROJECT_ROOT,
+            check=True,
+            capture_output=True,
+        )
+        # Get current container config before stopping
+        inspect = subprocess.run(
+            ['docker', 'inspect', CONTAINER_NAME, '--format', '{{json .Config.Env}}'],
+            capture_output=True, text=True,
+        )
+        env_vars = json.loads(inspect.stdout) if inspect.returncode == 0 else []
+
+        # Stop and remove old container
+        subprocess.run(['docker', 'stop', CONTAINER_NAME], capture_output=True)
+        subprocess.run(['docker', 'rm', CONTAINER_NAME], capture_output=True)
+
+        # Recreate with same config
+        cmd = [
+            'docker', 'run', '-d',
+            '--name', CONTAINER_NAME,
+            '--network', 'coolify',
+        ]
+        for env in env_vars:
+            if env.startswith('SOURCE_COMMIT='):
+                continue  # skip old commit
+            cmd.extend(['-e', env])
+        cmd.extend([
+            '-e', f'SOURCE_COMMIT={subprocess.check_output(["git", "-C", str(PROJECT_ROOT), "rev-parse", "HEAD"], text=True).strip()}',
+            '--label', 'coolify.applicationId=17',
+            '--label', 'coolify.environmentName=production',
+            '--label', 'coolify.managed=true',
+            '--label', 'coolify.name=zzhjq78rmhdl4aw6d0vdn3rz',
+            '--label', 'coolify.projectName=my-first-project',
+            '--label', 'coolify.resourceName=blog',
+            '--label', 'coolify.serviceName=blog',
+            '--label', 'coolify.type=application',
+            '--label', 'coolify.version=4.1.2',
+            '--label', 'coolify.pullRequestId=0',
+            '--label', 'caddy_ingress_network=coolify',
+            '--label', 'traefik.enable=true',
+            '--label', 'traefik.http.middlewares.gzip.compress=true',
+            '--label', 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https',
+            '--label', f'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.entryPoints=http',
+            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.middlewares=redirect-to-https',
+            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.rule=Host(`blog.sebastianmorales.sbs`) && PathPrefix(`/`)',
+            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.service=http-0-zzhjq78rmhdl4aw6d0vdn3rz',
+            '--label', 'traefik.http.services.http-0-zzhjq78rmhdl4aw6d0vdn3rz.loadbalancer.server.port=80',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.entryPoints=https',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.middlewares=gzip,redirect-to-https',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.rule=Host(`blog.sebastianmorales.sbs`) && PathPrefix(`/`)',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.service=http-0-zzhjq78rmhdl4aw6d0vdn3rz',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.tls.certresolver=letsencrypt',
+            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.tls.domains[0].main=blog.sebastianmorales.sbs',
+            IMAGE_NAME,
+        ])
+        subprocess.run(cmd, check=True, capture_output=True)
+        logger.info('Container rebuilt and restarted successfully.')
+    except Exception as e:
+        logger.error(f'Container rebuild failed: {e}')
 
 
 if __name__ == '__main__':
