@@ -13,8 +13,9 @@ jobs:
       - name: Trigger deployment
         run: |
           echo "Triggering deployment via webhook..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "http://143.47.45.158:9000/deploy")
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+            "https://sebastianmorales.sbs/api/v1/deploy?uuid=${{ secrets.COOLIFY_APP_UUID }}")
           
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
