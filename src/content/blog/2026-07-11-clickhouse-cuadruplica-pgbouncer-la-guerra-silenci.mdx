@@ -1,0 +1,63 @@
+---
+title: "ClickHouse cuadruplica PgBouncer: la guerra silenciosa por Postgres gestionado"
+description: "Análisis crítico del anuncio de ClickHouse sobre el escalado de PgBouncer y sus implicaciones en el oligopolio de bases de datos gestionadas en la nube."
+pubDate: 2026-07-11T20:01:08.516612+00:00
+author: "Sebastian Morales"
+tags: ["clickhouse", "postgresql", "pgbouncer", "cloud-computing", "base-de-datos"]
+source: "HackerNews"
+image: "https://image.pollinations.ai/prompt/An%20editorial%20photo%20of%20a%20modern%20data%20center%20corridor%20with%20rows%20of%20server%20racks%2C%20soft%20overhead%20LED%20lighting%2C%20neutral%20gray%20and%20white%20tones%2C%20slight%20perspective%20depth%2C%20no%20people%20visible?width=1200&height=675&model=flux&nologo=true&seed=38822"
+draft: false
+---
+
+# ClickHouse cuadruplica PgBouncer: la guerra silenciosa por Postgres gestionado
+
+La noticia técnica parece modesta: un equipo de ingeniería afirma haber escalado el rendimiento de PgBouncer —un proxy de pooling de conexiones para PostgreSQL— hasta multiplicarlo por cuatro. Pero detrás de este anuncio se esconde una movida estratégica que merece atención: ClickHouse, la compañía con raíces en Yandex y conocida por su motor OLAP columnar, está presionando con fuerza en el territorio de las bases de datos gestionadas, un mercado controlado por AWS, Google y Microsoft.
+
+Para entender por qué esto importa, hay que mirar la foto completa del mercado.
+
+## El oligopolio silencioso de las bases de datos en la nube
+
+El mercado de bases de datos gestionadas es, junto con el cómputo y el almacenamiento, uno de los tres pilares sobre los que los hyperscalers —AWS, Microsoft Azure y Google Cloud— han construido márgenes operativos consistentemente superiores al 30%. Servicios como Amazon RDS, Aurora y las distintas variantes de PostgreSQL gestionado en Azure y Google Cloud representan miles de millones de dólares en ingresos recurrentes anuales. Son productos con altos costos de cambio para el cliente, contratos a largo plazo y, sobre todo, integración vertical con el resto de la nube del proveedor.
+
+Cuando una empresa como ClickHouse decide ofrecer Postgres gestionado con rendimiento mejorado en el pooling de conexiones, no está haciendo una contribución técnica aislada. Está intentando romper la lógica del vendor lock-in aprovechando una debilidad estructural de los incumbents: la complejidad operativa y la opacidad de pricing.
+
+## PgBouncer: una pieza crítica, un cuello de botella conocido
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/An%20editorial%20photo%20of%20a%20modern%20data%20center%20corridor%20with%20rows%20of%20server%20racks%2C%20soft%20overhead%20LED%20lighting%2C%20neutral%20gray%20and%20white%20tones%2C%20slight%20perspective%20depth%2C%20no%20people%20visible?width=1200&height=675&model=flux&nologo=true&seed=38822)
+
+
+
+El problema es que PgBouncer, siendo una pieza de software madura pero no especialmente optimizada para cargas extremas, se convierte frecuentemente en un cuello de botella. Multiplicar su rendimiento por cuatro no es trivial: implica reescribir partes críticas, posiblemente integrar técnicas de eBPF, manejar backpressure de forma más inteligente, o aprovechar mejor las APIs modernas del kernel Linux.
+
+
+## ¿Por qué ClickHouse está haciendo esto?
+
+
+Primero, **capturar el stack completo de datos**. Si una empresa usa ClickHouse para analítica, ¿por qué no ofrecerle también su Postgres transaccional? El LTV (lifetime value) por cliente se multiplica, y el costo de cambio del usuario aumenta exponencialmente.
+
+Segundo, **atacar a los hyperscalers en su propio terreno**. Los márgenes de los proveedores cloud en servicios gestionados son obscenos comparados con el cómputo puro. Cualquier competidor que ofrezca rendimiento equivalente —o superior— a un precio inferior erosiona directamente esa ventaja.
+
+Tercero, **capitalizar la fatiga del lock-in**. Cada vez más empresas buscan salir de AWS RDS o Google Cloud SQL, especialmente tras las polémicas por egress fees y las subidas de precio sostenidas de los últimos años. Un proveedor independiente con soporte serio de Postgres es una propuesta atractiva en ese contexto.
+
+## Las asimetrías que el anuncio no menciona
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20minimalist%20flat%20illustration%20of%20interconnected%20circles%20and%20lines%20representing%20database%20connection%20pooling%2C%20simple%20geometric%20shapes%2C%20muted%20blue%20and%20gray%20palette%2C%20clean%20composition%20on%20white%20background?width=1200&height=675&model=flux&nologo=true&seed=6865)
+
+
+
+Los incumbentes tienen ventajas de escala, capital y, sobre todo, de integración vertical con el resto de su ecosistema cloud. También hay que notar que la economía de las bases de datos gestionadas favorece a quien controla la infraestructura subyacente. AWS, Google y Microsoft pueden permitirse pérdidas en servicios gestionados si eso les ayuda a vender más cómputo, almacenamiento y egress. ClickHouse, como proveedor independiente, necesita generar margen desde el primer día o conseguir capital suficiente para subsidiar el crecimiento —algo cada vez más difícil en el entorno actual de tipos de interés altos.
+
+
+## Conclusión: ¿se viene una fragmentación del mercado cloud?
+
+El anuncio de los 4x en PgBouncer es un síntoma, no la enfermedad. La enfermedad es que el mercado de infraestructura de datos en la nube está demasiado concentrado, y eso tiene consecuencias que van mucho más allá de los precios: condiciona qué proyectos open-source reciben inversión, cómo se diseñan los estándares técnicos, y hasta qué punto las empresas pueden migrar libremente entre proveedores.
+
+La pregunta no es si ClickHouse va a ganarle a AWS RDS en el corto plazo —probablemente no—. La pregunta es si van a sobrevivir lo suficiente, junto con otros competidores independientes, como para que los hyperscalers tengan que responder con mejores precios, mejor rendimiento, o ambas cosas. Históricamente, la competencia real —no la potencial— es lo único que ha obligado a estos oligopolios a moverse en serio.
+
+
+
+```mermaid
+    ClickHouse[ClickHouse] -->|Ofrece| ManagedPG[Postgres Gestionado]
+    ManagedPG -->|Compite con| AWSRDS[AWS RDS]
+    ManagedPG -->|Compite con| AzureDB[Azure Database]
+```
