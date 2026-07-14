@@ -1,0 +1,70 @@
+---
+title: "Quién controla las palabras que escribe la IA: el caso \"load-bearing\""
+description: "Un experimento de prompt engineering revela cómo Anthropic, OpenAI y Google moldean el lenguaje de millones de usuarios, y por qué eso importa más de lo que parece."
+pubDate: 2026-07-14T20:02:29.000365+00:00
+author: "Sebastian Morales"
+tags: ["inteligencia artificial", "Anthropic", "Claude", "RLHF", "lenguaje", "concentraci\u00f3n de mercado"]
+source: "HackerNews"
+image: "https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20an%20open%20laptop%20on%20a%20minimal%20wooden%20desk%2C%20screen%20showing%20lines%20of%20plain%20text%2C%20soft%20natural%20daylight%20from%20a%20side%20window%2C%20neutral%20tones%2C%20shallow%20depth%20of%20field%2C%20realistic.?width=1200&height=675&model=flux&nologo=true&seed=25856"
+draft: false
+---
+
+# Quién controla las palabras que escribe la IA: el caso "load-bearing"
+
+Hay un detalle en la prosa de Claude, el modelo de lenguaje de Anthropic, que se ha convertido en una pequeña broma recurrente entre quienes lo usan a diario. Sus respuestas tienden a recurrir a palabras como *load-bearing*, *intricate*, *nuanced* o *tapestry* con una frecuencia que delata el proceso industrial que las produce. Un desarrollador llamado Jola publicó recientemente una guía práctica para desactivar ese tic mediante instrucciones de sistema. Es un truco ingenioso, casi un acto de rebeldía doméstica. Pero detrás del workaround hay una pregunta mucho más seria: **¿quién decide, hoy, las palabras que millones de personas leen y copian cada día?**
+
+## El problema no es "load-bearing". El problema es el control.
+
+
+Cuando un usuario le pide a Claude un correo profesional, un ensayo académico o una entrada de blog, está recibiendo texto filtrado por los gustos de unas decenas de personas en una oficina californiana. No es un problema de calidad: es un problema de **legitimidad lingüística**. Y se repite, con variaciones, en cada producto de OpenAI, Google DeepMind y Meta.
+
+## La nueva monarquía del estilo
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20an%20open%20laptop%20on%20a%20minimal%20wooden%20desk%2C%20screen%20showing%20lines%20of%20plain%20text%2C%20soft%20natural%20daylight%20from%20a%20side%20window%2C%20neutral%20tones%2C%20shallow%20depth%20of%20field%2C%20realistic.?width=1200&height=675&model=flux&nologo=true&seed=25856)
+
+
+Históricamente, la autoridad sobre la "buena escritura" la ejercían instituciones más diversas: las redacciones de los periódicos, los manuales como *The Elements of Style* de Strunk y White, las guías de estilo de las editoriales, los profesores de literatura. Eran fuentes distribuidas, discutibles, a menudo en conflicto.
+
+Lo que ha cambiado en los últimos tres años es que el acceso democratizado a un asistente de escritura ha concentrado esa autoridad en **cuatro o cinco empresas**. Si mañana Anthropic decide que *load-bearing* vuelve a ser deseable, o que *delve* se considera obsoleto, esa decisión se propaga a millones de conversaciones en horas. Ningún editor de la historia tuvo ese poder.
+
+
+## La economía del RLHF, explicada sin marketing
+
+
+1. **Capital de riesgo e hyperscalers** financian el entrenamiento.
+2. **Trabajadores globales mal pagados** afinan el estilo.
+3. **Usuarios finales** reciben el producto terminado sin saber qué filtros atravesó.
+
+Es una cadena de valor que produce no solo conocimiento, sino **preferencias estéticas**. Y esas preferencias están calibradas, literalmente, por un puñado de decisiones tomadas en juntas directivas.
+
+## El precedente histórico: el corrector ortográfico y más allá
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20conceptual%20close-up%20of%20a%20person%27s%20hand%20typing%20on%20a%20backlit%20keyboard%2C%20a%20subtle%20reflection%20of%20text%20visible%20on%20the%20screen%2C%20warm%20natural%20light%20from%20a%20window%2C%20shallow%20depth%20of%20field%2C%20realistic%20office%20setting.?width=1200&height=675&model=flux&nologo=true&seed=75719)
+
+
+Quien vivió los 90 recuerda cuando Microsoft Word dictó, de facto, el inglés americano estándar. El "azul" ortográfico de Word redefinió qué era un error y qué era una variante dialectal aceptable. Google Docs, Grammarly y ahora los LLMs han heredado y ampliado ese rol.
+
+La diferencia es la **escala conversacional**. Word corregía palabras sueltas; Claude redacta párrafos enteros. Word influía en cómo escribías; Claude influye en cómo *piensas que suena profesional*. Escribir un correo con ayuda de un LLM es hoy tan normal como usar Word en 1998, pero las implicaciones de poder son incomparablemente mayores.
+
+## ¿Por qué importa quejarse de "load-bearing"?
+
+El artículo de Jola es modesto: un fragmento de system prompt que añade "no uses load-bearing ni synonyms innecesariamente". Funciona. Pero su verdadera utilidad es pedagógica. Al documentar el workaround, expone el mecanismo. Es el equivalente técnico a señalar al mago mientras hace el truco.
+
+Lo que necesitamos como industria, y como sociedad, no es solo más listas de palabras prohibidas. Es **transparencia sobre los procesos de alineación estética**. Anthropic publicó en 2023 sus "Core Views on AI Safety", pero apenas ha detallado qué criterios estilísticos premia su RLHF. OpenAI fue más explícita en su Model Spec, pero el documento sigue siendo interno. Google DeepMind ni siquiera tiene un equivalente público.
+
+## El usuario como comité editorial involuntario
+
+Mientras tanto, los usuarios hacemos de comité editorial descentralizado, intentando que la IA suene "menos robótica" añadiendo instrucciones caseras. Es un mercado paralelo de prompt engineering que mueve millones en cursos, newsletters y repositorios de GitHub. Hay ironía aquí: estamos pagando —con nuestro tiempo y nuestros datos— para revertir el efecto de un producto que ya pagamos.
+
+La concentración de capital en IA ha producido también una **concentración de gusto**. La próxima vez que un correo, una tesis o un artículo de blog te suene raro, demasiado pulido, demasiado "de IA", piensa en Jola intentando sacar la palabra *load-bearing* de Claude. Está peleando una batalla pequeña contra una estructura muy grande. Y la pelea importa, porque las palabras que una herramienta usa terminan siendo las palabras que sus usuarios adoptan.
+
+La pregunta no es si Claude debería decir *load-bearing*. La pregunta es **quién tiene derecho a decidir qué dice la máquina que millones de personas escuchan cada día**. Y esa pregunta, todavía, no tiene respuesta.
+
+```mermaid
+graph LR
+    Big Tech --> Training Compute
+    Contractors --> RLHF Labels
+    RLHF Labels --> Model Style
+    Model Style --> End Users
+    End Users --> Written Content
+```
