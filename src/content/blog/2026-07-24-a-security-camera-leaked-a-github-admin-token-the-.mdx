@@ -1,0 +1,73 @@
+---
+title: "A Security Camera Leaked a GitHub Admin Token. The Real Problem Is Much Bigger"
+description: "When Hanwha Vision shipped a hardcoded admin credential in its security camera firmware, it exposed a structural failure in the IoT industry, not just a developer's mistake. Here is what the incident reveals about market concentration, misaligned incentives, and the regulatory void that keeps our devices insecure."
+pubDate: 2026-07-24T20:02:43.010656+00:00
+author: "Sebastian Morales"
+tags: ["IoT security", "security cameras", "Hanwha Vision", "supply chain", "GitHub token", "cybersecurity", "surveillance industry", "chaebol"]
+source: "HackerNews"
+image: "https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20a%20network%20security%20camera%20mounted%20on%20a%20white%20office%20ceiling%2C%20soft%20natural%20lighting%20from%20a%20side%20window%2C%20neutral%20gray%20and%20beige%20tones%2C%20the%20camera%20lens%20slightly%20off-center%2C%20professional%20composition?width=1200&height=675&model=flux&nologo=true&seed=34956"
+draft: false
+---
+
+The headline reads like dark comedy: a security camera, whose entire job is to be secure, shipped with a GitHub admin token hardcoded into its public-facing login page. Anyone who opened the page source could see it. Anyone who saw it could push code to Hanwha Vision's repositories, the very pipelines that build the firmware running on millions of these devices worldwide.
+
+This isn't a fringe incident. It's a textbook case of how the IoT industry actually works, and why "smart" devices keep becoming liabilities.
+
+## What actually happened
+
+According to the disclosure, a security researcher found that the web interface of certain Hanwha Vision cameras contained a GitHub Personal Access Token (PAT) in plain sight. Not encrypted, not obfuscated, not behind a build-time secret manager. Just sitting in the page's JavaScript. With that token, which had admin-level scope on the organization's repositories, an attacker could have read source code, modified CI/CD pipelines, and potentially injected malicious updates into the camera firmware supply chain.
+
+
+## The company behind the camera
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20a%20network%20security%20camera%20mounted%20on%20a%20white%20office%20ceiling%2C%20soft%20natural%20lighting%20from%20a%20side%20window%2C%20neutral%20gray%20and%20beige%20tones%2C%20the%20camera%20lens%20slightly%20off-center%2C%20professional%20composition?width=1200&height=675&model=flux&nologo=true&seed=34956)
+
+
+Hanwha Vision (formerly Hanwha Techwin, formerly Samsung Techwin) is a subsidiary of Hanwha Group, one of South Korea's ten largest *chaebols*, the family-controlled conglomerates that dominate the country's economy alongside Samsung, Hyundai, LG, and SK. To understand how a token like this ends up in production, you have to understand what a chaebol actually is: a sprawling corporate empire with fingers in defense, chemicals, solar panels, explosives, hotels, and — yes — surveillance.
+
+Hanwha didn't organically build a camera business. It acquired Samsung's defense and surveillance unit in 2014, a deal that gave it instant market share along with years of legacy codebases. This is a recurring pattern in IoT: rapid growth through acquisition, with security debt inherited and rarely audited. When your strategy is "buy competitors, rebrand their products, hit quarterly numbers," technical hygiene tends to slip through the cracks.
+
+Today, Hanwha Vision is one of the top global players in network video surveillance, competing with China's Hikvision and Dahua, and Sweden's Axis Communications (owned by Japanese conglomerate Canon). The professional surveillance market is a near-oligopoly. Four companies control the majority of large-scale installations worldwide, in cities, airports, casinos, and government buildings.
+
+## Why this keeps happening
+
+Three structural forces explain the recurring disaster of insecure IoT:
+
+**1. The race to ship beats the race to secure.** Camera vendors compete on resolution, AI analytics, and price-per-channel. Security is a feature nobody demos. A sales engineer can pitch "4K resolution with on-device AI" to a procurement officer at a city government or a retail chain. Nobody in that meeting asks, "Is there a hardcoded token in your login page?" The incentives are misaligned at every level of the B2B sale.
+
+**2. The developer convenience tax.** Hardcoded tokens exist because someone, somewhere, needed to push code from a build pipeline to a repository, and embedded the credential directly to save an afternoon of setting up proper secret management. It works, it ships, and there's no obvious failure until the code is public. This is the same pattern behind the 2021 Verkada breach, where attackers accessed 150,000 cameras using credentials found in exposed internal tooling, and countless smaller supply-chain incidents that never make the news.
+
+**3. A regulatory vacuum.** Unlike pharmaceuticals, automobiles, or financial services, IoT has almost no mandatory security standards. The US has the voluntary U.S. Cyber Trust Mark. The EU's Cyber Resilience Act is real but phases in slowly. China's standards exist, but they are designed around state access rather than consumer protection. The result: vendors optimize for the cheapest path to whatever compliance is actually required, which in most jurisdictions is essentially nothing.
+
+## The concentration problem
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20minimalist%20flat%20illustration%20of%20a%20security%20camera%20with%20a%20small%20cracked%20lock%20icon%20on%20its%20side%2C%20simple%20geometric%20shapes%2C%20muted%20blue%20and%20gray%20palette%2C%20clean%20white%20background%2C%20no%20text?width=1200&height=675&model=flux&nologo=true&seed=77902)
+
+
+Here's what should genuinely worry you: the same handful of companies that dominate the camera market also control the cloud infrastructure, the AI model pipelines, and the over-the-air update mechanisms for their devices. A breach in one vendor isn't just a breach of its products. It's a potential breach of every customer downstream.
+
+This is the same dynamic we see with the concentration of cloud computing (AWS, Azure, Google Cloud), mobile operating systems (iOS, Android), and AI infrastructure (Nvidia, OpenAI, Anthropic). When a few players control the pipes, a single mistake, or a single malicious insider, cascades into everyone else's problem.
+
+## A history of cameras betraying their owners
+
+The Hanwha incident joins a depressing lineage:
+
+- **2016, Mirai botnet:** Hundreds of thousands of IoT cameras and DVRs were conscripted into a botnet that briefly knocked major internet infrastructure offline. Default credentials were the entry point.
+- **2021, Verkada breach:** Employees and customers of Tesla, Cloudflare, Equinox, and others were watched through 150,000 cameras after attackers found a super-admin account in an exposed Jenkins instance.
+- **2023, Ring settlement:** Amazon's doorbell subsidiary paid $5.8 million after multiple incidents of hackers accessing home cameras and speaking directly to children.
+
+Every few years, the same lesson is learned and forgotten. The IoT industry treats these as isolated PR problems, not as systemic design failures.
+
+## What the token leak actually tells us
+
+A hardcoded GitHub admin token in a production security camera isn't really about one company's mistake. It's about an industry that has externalized the cost of insecurity onto its users. You buy a camera, install it, point it at your lobby, and trust that the manufacturer has done the work. They haven't. The market doesn't reward them for doing it, and the regulators don't punish them for skipping it.
+
+Until insecure devices become unsellable, with real penalties and not voluntary frameworks, the calculus won't change. The cameras watching us will keep being the cameras leaking from us. The question is no longer whether the next breach will happen. It's which conglomerate will be the one to learn this lesson most expensively.
+
+```mermaid
+graph LR
+A[Hanwha Group Chaebol] --> B[Hanwha Vision]
+B --> C[Camera Firmware Build]
+C --> D[Hardcoded GitHub Token]
+D --> E[Internal Repositories Exposed]
+```
