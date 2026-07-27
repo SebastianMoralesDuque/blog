@@ -1,0 +1,72 @@
+---
+title: "PGSimCity y la paradoja del software libre: cuando las nubes se quedan con el beneficio"
+description: "Un simulador interactivo para entender PostgreSQL revela cómo el código abierto alimenta a los gigantes cloud mientras los desarrolladores sostienen la infraestructura gratis."
+pubDate: 2026-07-27T08:06:03.169897+00:00
+author: "Sebastian Morales"
+tags: ["PostgreSQL", "open source", "cloud computing", "AWS", "base de datos", "tecnolog\u00eda"]
+source: "HackerNews"
+image: "https://image.pollinations.ai/prompt/A%20conceptual%20photo%20of%20a%20developer%27s%20hands%20typing%20SQL%20queries%20on%20a%20laptop%20screen%20showing%20database%20schema%20diagrams%2C%20soft%20natural%20light%20from%20a%20window%2C%20shallow%20depth%20of%20field%2C%20neutral%20modern%20office%20environment?width=1200&height=675&model=flux&nologo=true&seed=36541"
+draft: false
+---
+
+# PGSimCity y la paradoja del software libre: cuando las nubes se quedan con el beneficio
+
+
+## Una simulación que desnuda la complejidad
+
+PGSimCity, publicado por el desarrollador Nikolay Samokhvalov y viralizado en Hacker News, es esencialmente un patio de recreo pedagógico. Permite ejecutar consultas SQL en un entorno visual donde se observan los buffers, los índices B-tree, los archivos WAL, los procesos de vacuum y los heaps. Es educativo en el mejor sentido: transforma conceptos abstractos en algo manipulable.
+
+Pero lo que hace interesante a PGSimCity no es solo su valor didáctico, sino lo que ilumina sobre la **economía política de las bases de datos**. Para entender por qué este simulador importa, hay que recordar la historia.
+
+## La guerra de las bases de datos: del monopolio a la commodity
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20conceptual%20photo%20of%20a%20developer%27s%20hands%20typing%20SQL%20queries%20on%20a%20laptop%20screen%20showing%20database%20schema%20diagrams%2C%20soft%20natural%20light%20from%20a%20window%2C%20shallow%20depth%20of%20field%2C%20neutral%20modern%20office%20environment?width=1200&height=675&model=flux&nologo=true&seed=36541)
+
+
+Durante los años ochenta y noventa, el mercado de bases de datos relacionales fue un feudo casi feudal. **Oracle**, bajo el mando de Larry Ellison, construyó un imperio cobrando licencias prohibitivas que llegaban a representar el 30% del presupuesto TI de una empresa. **IBM** blindó Db2 dentro de su ecosistema de mainframes. **Microsoft** empujó SQL Server como pieza clave de su estrategia de lock-in empresarial.
+
+El modelo era claro: código propietario, contratos opacos, y la migración como una pesadilla que costaba millones. Las empresas eran rehénes.
+
+La aparición de **MySQL** en 1995 y, sobre todo, la maduración de **PostgreSQL** durante los 2000, rompió ese esquema. PostgreSQL no fue un accidente: nació en la Universidad de Berkeley en 1986 como proyecto académico, se convirtió en open source y fue adoptada por una comunidad que, según estimaciones conservadoras, ha invertido **más de mil millones de dólares en horas de ingeniería** a lo largo de su historia.
+
+## El gran interruptor: cuando el open source se volvió infraestructura crítica
+
+La ironía histórica es que las mismas empresas que durante décadas combatieron el software libre terminaron adoptándolo. **IBM** compró Red Hat por 34.000 millones de dólares en 2019, en parte para reposicionarse en el ecosistema Linux y PostgreSQL. **Microsoft** adquirió Citus Data, una extensión clave de PostgreSQL, y la integró en Azure. **Amazon** construyó Aurora, su motor insignia, sobre el código de PostgreSQL y MySQL.
+
+Hoy, según DB-Engines Ranking, PostgreSQL es el motor de base de datos más popular del mundo. AWS, Google Cloud y Azure ofrecen servicios gestionados basados en él. Empresas como **EnterpriseDB**, **Crunchy Data** y **Cockroach Labs** han construido negocios millonarios sobre esta base comunitaria.
+
+## La paradoja del valor capturado
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20minimalist%20flat%20illustration%20of%20stacked%20database%20cylinders%20with%20one%20highlighted%20in%20coral%20red%2C%20simple%20geometric%20shapes%2C%20muted%20blue%20and%20gray%20palette%2C%20clean%20composition?width=1200&height=675&model=flux&nologo=true&seed=46904)
+
+
+
+
+
+## La educación como extractivismo blando
+
+
+Cuando Google publica tutoriales sobre Kubernetes, o cuando AWS financia documentación sobre PostgreSQL, no lo hace por filantropía. Está reduciendo el coste de adquisición de clientes. Está estandarizando el conocimiento sobre plataformas que ellos controlan. Está, en definitiva, externalizando la formación de su propia fuerza laboral hacia la comunidad.
+
+## El simulador como acto político
+
+Dicho todo esto, no quiero pecar de cinismo. PGSimCity es genuinamente valioso. Conocer cómo se comporta un VACUUM, entender por qué un índice B-tree puede degradarse, visualizar el flujo de WAL en una réplica, son habilidades que **devuelven poder al profesional técnico** frente a las cajas negras propietarias.
+
+Cada vez que un desarrollador entiende mejor la herramienta que usa, se reduce la dependencia de intermediarios que cobran por traducir lo que pasa bajo el capó. Es el mismo principio detrás del movimiento del software libre desde los años ochenta: **el conocimiento compartido es la base de cualquier contrapoder técnico real**.
+
+
+```mermaid
+graph LR
+A[PGSimCity] --> B[Developers]
+B --> C[PostgreSQL]
+C --> D[Cloud Hyperscalers]
+D --> E[Billion-Dollar Revenue]
+```
+
+## Conclusión: la pregunta que PGSimCity nos obliga a hacer
+
+
+
+
+
+A[PGSimCity] --> B[Developers]
