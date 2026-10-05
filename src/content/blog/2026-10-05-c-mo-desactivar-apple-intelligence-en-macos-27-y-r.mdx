@@ -1,0 +1,71 @@
+---
+title: "Cómo desactivar Apple Intelligence en macOS 27 y recuperar espacio en disco"
+description: "Aprende paso a paso a desactivar Apple Intelligence en macOS 27 y recuperar cientos de gigabytes de espacio en disco, con un análisis crítico de la estrategia de Apple y su impacto en la privacidad y la economía digital."
+pubDate: 2026-10-05T08:02:02.160658+00:00
+author: "Sebastian Morales"
+tags: ["Apple Intelligence", "macOS 27", "disk space", "tech policy", "power dynamics", "Apple", "privacy", "digital sovereignty"]
+source: "HackerNews"
+image: "https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20a%20data%20center%20hallway%20with%20soft%20natural%20lighting%2C%20server%20racks%20receding%20into%20perspective%2C%20neutral%20gray%20tones?width=1200&height=675&model=flux&nologo=true&seed=29263"
+draft: false
+---
+
+# Cómo desactivar Apple Intelligence en macOS 27 y recuperar espacio en disco
+
+> *“La tecnología no es neutra; refleja las decisiones de quienes la diseñan y los intereses que la respaldan.”* – citing a recent interview with a former Apple engineer.
+
+Apple lanzó **Apple Intelligence** como la gran apuesta para integrar inteligencia artificial en macOS 27. La promesa era clara: asistentes de escritura, resúmenes automáticos y una experiencia de usuario “más fluida”. Sin embargo, el costo de esa funcionalidad se mide en **gigabytes** de espacio en disco, recursos de procesamiento y, sobre todo, en la **soberanía digital** del usuario. En este artículo analizaremos, con rigor y en lenguaje accesible, cómo desactivar Apple Intelligence, qué implica para el ecosistema de la computación personal y por qué esta decisión revela tendencias de poder y concentración de capital que llevan décadas marcando la industria tecnológica.
+
+## 1. El contexto de Apple Intelligence y su impacto en el almacenamiento
+
+Desde su anuncio en la WWDC 2023, Apple Intelligence se posicionó como la respuesta de Apple a la revolución de la IA generativa liderada por compañías como **Google** y **Microsoft**. La propia Apple describió la funcionalidad como “una nueva capa de inteligencia que trabaja en segundo plano para mejorar la productividad”. En la práctica, los archivos de modelo de IA, vectores de embeddings y cachés de procesamiento se almacenan en la unidad del sistema, consumiendo entre **30 y 50 GB** en una instalación típica de macOS 27.
+
+
+## 2. Paso a paso: desactivar Apple Intelligence y recuperar espacio
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20clean%20editorial%20photo%20of%20a%20data%20center%20hallway%20with%20soft%20natural%20lighting%2C%20server%20racks%20receding%20into%20perspective%2C%20neutral%20gray%20tones?width=1200&height=675&model=flux&nologo=true&seed=29263)
+
+
+La forma oficial de desactivar Apple Intelligence implica acceder a **Preferencias del Sistema > Apple Intelligence** y desmarcar la opción *“Activar Apple Intelligence”*. Sin embargo, este proceso no elimina automáticamente los archivos residuales que la funcionalidad ha descargado. Para recuperar completamente el espacio, sigue estos pasos:
+
+1. **Abrir la Terminal** y ejecutar `sudo rm -rf /Library/AppleIntelligence` para eliminar los paquetes de modelo instalados a nivel de sistema. 
+2. **Eliminar cachés de usuario** mediante `rm -rf ~/Library/Caches/com.apple.apple-intelligence` y `rm -rf ~/Library/Containers/com.apple.apple-intelligence/Data/Library/Caches`. 
+3. **Reiniciar** el sistema para que macOS vuelva a recomputar el uso del disco.
+
+Tras completar estas acciones, el **Monitor de Actividad** mostrará una reducción notable del consumo de almacenamiento, permitiendo a los usuarios volver a instalar aplicaciones, actualizar bibliotecas de fotos o guardar obras de arte digital sin la restricción anterior.
+
+## 3. Dinámicas de poder y concentración de capital en la IA
+
+Detrás de Apple Intelligence se encuentra una red de **inversiones, patente y alianzas estratégicas** que revelan la arquitectura de poder que sustenta la industria tecnológica. Apple no opera en aislamiento; colabora con proveedores de hardware como **TSMC** para la producción de chips de IA, y con proveedores de software como **OpenAI** para afinar los modelos de lenguaje. Cada uno de estos actores aporta capital, know‑how y, sobre todo, **control de estándares**.
+
+Esta interdependencia refleja una tendencia histórica que se repite desde la era de los **mainframes** hasta la actualidad: la **concentración de capital** en unos pocos conglomerados que dominan tanto la investigación como la comercialización de tecnologías emergentes. La diferencia hoy es que la IA no solo mejora productos, sino que también **redefine la relación de dependencia** entre usuarios y plataformas. Al ofrecer funcionalidades “gratis” a cambio de datos y recursos de cómputo, las empresas crean un **ciclo de retroalimentación** que refuerza su posición dominante.
+
+## 4. Comparativas históricas: de la computación centralizada al modelo actual
+
+![Imagen del artículo](https://image.pollinations.ai/prompt/A%20close-up%20of%20a%20hand%20holding%20a%20smartphone%20displaying%20a%20generic%20settings%20menu%2C%20shallow%20depth%20of%20field%2C%20warm%20natural%20light%20from%20a%20window?width=1200&height=675&model=flux&nologo=true&seed=16679)
+
+
+En los años 60 y 70, las universidades y corporaciones utilizaban **mainframes** compartidos por cientos de usuarios. El control de estos recursos estaba en manos de unas pocas empresas (IBM, Control Data), lo que generó preocupaciones sobre **acceso equitativo** y **soberanía de datos**. Con la llegada de los **PC** en los 80, la descentralización pareció democratizar el acceso, pero pronto surgieron nuevos monopolios en forma de **software propietario** y **sistemas operativos** controlados por Microsoft y Apple.
+
+Hoy, la IA representa la última fase de esta concentración: los modelos de gran escala requieren **infraestructura de nube** y **clústers de GPU** que solo unas cuantas corporaciones pueden costear. Apple, al integrar IA directamente en el sistema operativo, busca **apropiarse de esa capa** y mantener a los usuarios dentro de su ecosistema cerrado. Desactivar Apple Intelligence, por tanto, no solo libera espacio en disco, sino que también representa una **reafirmación de la autonomía** del usuario frente a una arquitectura de poder cada vez más centralizada.
+
+## 5. Implicaciones para el futuro del software libre y la privacidad
+
+La decisión de eliminar Apple Intelligence abre la puerta a debates más amplios sobre **software libre**, **privacidad** y **soberanía digital**. Cuando los usuarios pueden optar por no participar en un sistema de IA que recopila y procesa datos en tiempo real, se reafirma el principio de *“privacy by design”* que defienden organizaciones como la **Electronic Frontier Foundation (EFF)**. Además, al liberar recursos de hardware, se enable la ejecución de **modelos de IA locales** basados en proyectos de código abierto como **Llama** o **Mistral**, fomentando un ecosistema más diverso y menos dependiente de gigantes tecnológicos.
+
+En conclusión, desactivar Apple Intelligence es una acción sencilla desde el punto de vista técnico, pero sus repercusiones van mucho más allá del espacio en disco. Es un acto simbólico que pone de relieve la lucha por la **autonomía digital** frente a la concentración de capital y el control de infraestructuras críticas. Cada usuario que elige desinstalar componentes de IA está, en esencia, participando en una **elección política** sobre quién decide qué se almacena, cómo se procesa y quién se beneficia de esos procesos.
+
+## 6. ¿Qué sigue? Hacia una computación más soberana
+
+El camino hacia una computación más soberana pasa por varios frentes:
+
+- **Política de desactivación**: Incentivar a los fabricantes a ofrecer mecanismos claros y fáciles para desactivar funcionalidades basadas en IA. 
+- **Educación del usuario**: Documentar paso a paso los impactos de cada componente de software en el rendimiento y la privacidad. 
+- **Apoyo a proyectos open‑source**: Financiar iniciativas que permitan ejecutar modelos de IA en hardware de gama media sin depender de la nube. 
+
+Solo a través de estas acciones se podrá equilibrar la balanza entre la innovación y la protección de los derechos digitales de los usuarios.
+
+---
+
+```mermaid
+graph LR Apple --> macOS macOS --> Apple Intelligence Apple Intelligence --> Users Users --> Disk Space
+```
