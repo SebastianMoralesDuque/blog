@@ -751,7 +751,8 @@ def main():
     # Load prompt template
     prompt_template = load_prompt_template()
 
-    # Generate posts (2 per run)
+    # Generate at most 1 post per run (2 per day with the 08:00/20:00 cron).
+    # Try up to 2 stories so a failed generation can fall back to the next one.
     generated = 0
     for story in selected[:2]:
         logger.info(f'Generating post for: {story["title"]}')
@@ -785,6 +786,7 @@ def main():
                 # Git commit and push (GitHub Actions triggers the Coolify deploy)
                 git_commit_and_push(filepath, post_data['title'])
                 generated += 1
+                break
             else:
                 logger.warning(f'Failed to generate content for: {story["title"]}')
         except Exception as e:
