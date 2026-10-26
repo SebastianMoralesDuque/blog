@@ -1,6 +1,8 @@
 Eres un analista de tecnología independiente.
 Escribe un artículo de blog sobre esta noticia tecnológica.
 
+IMPORTANTE: No escribas razonamiento, borradores, etiquetas  ni texto antes de TITLE:. Empieza directamente con TITLE:.
+
 Título de la noticia: {title}
 Fuente: {source}
 Contexto: {context}
@@ -46,3 +48,6 @@ TITLE: [título del artículo]
 DESCRIPTION: [descripción meta de 1-2 oraciones]
 TAGS: [tag1, tag2, tag3]
 CONTENT: [contenido del artículo en MDX]
+
+- No incluyas etiquetas  ni razonamiento interno.
+- El CONTENT debe ser MDX válido: no uses autolinks <https://...>; escribe https://... o [texto](https://...).

@@ -4,28 +4,65 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: blog-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger deployment
+      - name: Trigger deployment and wait for result
+        env:
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
         run: |
-          echo "Triggering deployment via webhook..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-            "https://sebastianmorales.sbs/api/v1/deploy?uuid=${{ secrets.COOLIFY_APP_UUID }}")
-          
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | head -n-1)
-          
-          echo "HTTP Status: $HTTP_CODE"
-          echo "Response: $BODY"
-          
-          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
-            echo "✅ Deployment queued successfully"
-          else
-            echo "❌ Deployment failed"
+          set -euo pipefail
+
+          RESPONSE=$(curl -sS -X POST "https://sebastianmorales.sbs/api/v1/deploy" \
+            -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"uuid\":\"${COOLIFY_APP_UUID}\"}")
+
+          echo "Coolify response: ${RESPONSE}"
+
+          DEPLOY_UUID=$(echo "${RESPONSE}" | jq -r '.deployments[0].deployment_uuid // .deployment_uuid // empty')
+          if [ -z "${DEPLOY_UUID}" ]; then
+            echo "::error::No se pudo obtener deployment_uuid de la respuesta de Coolify"
             exit 1
           fi
+
+          echo "Deployment UUID: ${DEPLOY_UUID}"
+
+          for attempt in $(seq 1 40); do
+            STATUS_JSON=$(curl -sS "https://sebastianmorales.sbs/api/v1/deployments/${DEPLOY_UUID}" \
+              -H "Authorization: Bearer ${COOLIFY_API_TOKEN}")
+            STATUS=$(echo "${STATUS_JSON}" | jq -r '.status // empty')
+            echo "Intento ${attempt}: ${STATUS}"
+
+            case "${STATUS}" in
+              finished)
+                echo "✅ Deployment finished"
+                exit 0
+                ;;
+              failed)
+                echo "::error::Deployment failed"
+                echo "${STATUS_JSON}" | jq -r '.logs // empty' | tail -80
+                exit 1
+                ;;
+              queued|in_progress|running)
+                sleep 15
+                ;;
+              *)
+                echo "::error::Estado inesperado: ${STATUS}"
+                echo "${STATUS_JSON}" | head -c 2000
+                exit 1
+                ;;
+            esac
+          done
+
+          echo "::error::Deployment timed out after 10 minutes"
+          exit 1

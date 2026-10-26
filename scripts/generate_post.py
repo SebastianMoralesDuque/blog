@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import re
+import shutil
 import subprocess
 import logging
 import urllib.parse
@@ -22,23 +23,27 @@ import feedparser
 # Paths (must be before logging)
 PROJECT_ROOT = Path(__file__).parent.parent
 
-# Configure logging (force=True clears stale handlers on re-import)
+# Configure logging. In cron, stdout is redirected to the same log file, so we
+# only add the console handler when running interactively to avoid duplicates.
 LOG_PATH = os.getenv('BLOG_LOG_PATH', str(PROJECT_ROOT / 'blog-generation.log'))
+_handlers = [logging.FileHandler(LOG_PATH, mode='a')]
+if sys.stdout.isatty():
+    _handlers.append(logging.StreamHandler(sys.stdout))
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     force=True,
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(LOG_PATH, mode='a'),
-    ]
+    handlers=_handlers,
 )
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
 OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'minimax-m3:cloud')
 SITE_URL = os.getenv('SITE_URL', 'https://blog.sebastianmorales.sbs')
+
+# Optional forced model (for testing) and last-resort local fallback.
+FORCED_MODEL = os.getenv('OLLAMA_MODEL', '').strip()
+LOCAL_MODEL = os.getenv('OLLAMA_LOCAL_MODEL', 'granite4.1:3b').strip()
 
 # Pollinations.ai configuration
 POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt'
@@ -55,6 +60,88 @@ RSS_FEEDS = [
     'https://www.theverge.com/rss/index.xml',
     'https://feeds.arstechnica.com/arstechnica/index',
 ]
+
+
+# Preferred order: quality first. The list is verified against Ollama at runtime
+# and cached for the whole process so we don't probe the same models four times.
+PREFERRED_CLOUD_MODELS = [
+    'gpt-oss:120b-cloud',
+    'nemotron-3-nano:30b-cloud',
+    'gpt-oss:20b-cloud',
+    'gemma4:31b-cloud',
+    'gemma4:cloud',
+]
+_FREE_MODELS_CACHE: Optional[list[str]] = None
+
+
+def discover_free_cloud_models() -> list[str]:
+    """Discover free cloud models available in Ollama (cached per process)."""
+    global _FREE_MODELS_CACHE
+    if _FREE_MODELS_CACHE is not None:
+        return _FREE_MODELS_CACHE
+
+    try:
+        resp = requests.get(f'{OLLAMA_BASE_URL}/api/tags', timeout=10)
+        resp.raise_for_status()
+        all_models = resp.json().get('models', [])
+    except Exception as e:
+        logger.warning(f'Could not fetch Ollama model list: {e}')
+        _FREE_MODELS_CACHE = []
+        return []
+
+    cloud_models = [
+        m['name'] for m in all_models
+        if m['name'].endswith(':cloud') or m['name'].endswith('-cloud')
+    ]
+    if not cloud_models:
+        logger.info('No cloud models found in Ollama')
+        _FREE_MODELS_CACHE = []
+        return []
+
+    def model_sort_key(name: str) -> tuple:
+        try:
+            return (PREFERRED_CLOUD_MODELS.index(name), name)
+        except ValueError:
+            return (len(PREFERRED_CLOUD_MODELS), name)
+
+    cloud_models.sort(key=model_sort_key)
+    logger.info(f'Found {len(cloud_models)} cloud models: {cloud_models}')
+
+    working = []
+    for model in cloud_models:
+        try:
+            test_resp = requests.post(
+                f'{OLLAMA_BASE_URL}/api/generate',
+                json={'model': model, 'prompt': 'Say OK', 'stream': False},
+                timeout=20,
+            )
+            test_resp.raise_for_status()
+            data = test_resp.json()
+            if data.get('response'):
+                working.append(model)
+                logger.info(f'Cloud model {model} is FREE and working')
+            else:
+                logger.info(f'Cloud model {model} returned empty (likely paid)')
+        except Exception as e:
+            error_msg = str(e)
+            if 'subscription' in error_msg or '402' in error_msg:
+                logger.info(f'Cloud model {model} requires subscription (paid)')
+            else:
+                logger.warning(f'Cloud model {model} error: {error_msg[:80]}')
+
+    logger.info(f'Free cloud models available: {working}')
+    _FREE_MODELS_CACHE = working
+    return working
+
+
+def get_models_to_try() -> list[str]:
+    """Return the ordered list of models for generation/review."""
+    if FORCED_MODEL:
+        return [FORCED_MODEL]
+    models = list(discover_free_cloud_models())
+    if LOCAL_MODEL and LOCAL_MODEL not in models:
+        models.append(LOCAL_MODEL)
+    return models
 
 
 def parse_image_prompts(text: str) -> dict:
@@ -235,73 +322,85 @@ TAGS: [tag1, tag2, tag3]
 CONTENT: [contenido del artículo en MDX]"""
 
 
+def call_ollama(prompt: str, model: str) -> Optional[str]:
+    """Call Ollama API with a specific model. Returns response text or None."""
+    try:
+        resp = requests.post(
+            f'{OLLAMA_BASE_URL}/api/generate',
+            json={
+                'model': model,
+                'prompt': prompt,
+                'stream': False,
+            },
+            timeout=180,
+        )
+        resp.raise_for_status()
+        return resp.json().get('response', '')
+    except requests.exceptions.Timeout:
+        logger.warning(f'Ollama request timed out for model {model}')
+        return None
+    except Exception as e:
+        logger.warning(f'Model {model} failed: {e}')
+        return None
+
+
 def generate_content(story: dict, prompt_template: str) -> Optional[dict]:
-    """Generate blog post content using Ollama API."""
+    """Generate blog post content with automatic model fallback."""
     prompt = prompt_template.format(
         title=story['title'],
         source=story['source'],
         context=story.get('description', story.get('url', '')),
     )
 
-    try:
-        resp = requests.post(
-            f'{OLLAMA_BASE_URL}/api/generate',
-            json={
-                'model': OLLAMA_MODEL,
-                'prompt': prompt,
-                'stream': False,
-            },
-            timeout=180,  # 3 minutes timeout
-        )
-        resp.raise_for_status()
-        response_text = resp.json().get('response', '')
+    models_to_try = get_models_to_try()
 
-        if not response_text:
-            logger.error('Empty response from Ollama')
-            return None
+    for model in models_to_try:
+        logger.info(f'Trying model: {model}')
+        response_text = call_ollama(prompt, model)
 
-        # Parse the response
-        parsed = parse_generated_content(response_text)
-        if parsed:
-            parsed['source_url'] = story.get('url', '')
-            parsed['source_name'] = story.get('source', 'Unknown')
-            parsed['raw_response'] = response_text
-        return parsed
+        if response_text:
+            parsed = parse_generated_content(response_text)
+            if parsed:
+                parsed['source_url'] = story.get('url', '')
+                parsed['source_name'] = story.get('source', 'Unknown')
+                parsed['raw_response'] = response_text
+                logger.info(f'Success with model: {model}')
+                return parsed
+            else:
+                logger.warning(f'Model {model} returned unparseable content, trying next...')
+        else:
+            logger.warning(f'Model {model} returned empty response, trying next...')
 
-    except requests.exceptions.Timeout:
-        logger.error('Ollama request timed out')
-        return None
-    except Exception as e:
-        logger.error(f'Failed to generate content: {e}')
-        return None
+    logger.error('All models failed')
+    return None
 
 
 def parse_generated_content(text: str) -> Optional[dict]:
     """Parse the structured output from Ollama."""
     try:
-        # Extract fields - use a more robust parsing approach
-        # Find TITLE: everything until next field or newline
-        title_match = re.search(r'TITLE:\s*(.+?)(?:\n|DESCRIPTION:)', text, re.DOTALL)
-        desc_match = re.search(r'DESCRIPTION:\s*(.+?)(?:\n|TAGS:)', text, re.DOTALL)
-        tags_match = re.search(r'TAGS:\s*(.+?)(?:\n|CONTENT:)', text, re.DOTALL)
-        content_match = re.search(r'CONTENT:\s*(.*)', text, re.DOTALL)
+        # Some models leak their reasoning before the real structured output.
+        # Use the LAST occurrence of each header so the final answer wins.
+        title_matches = re.findall(r'TITLE:\s*(.+?)(?:\n|DESCRIPTION:)', text, re.DOTALL)
+        desc_matches = re.findall(r'DESCRIPTION:\s*(.+?)(?:\n|TAGS:)', text, re.DOTALL)
+        tags_matches = re.findall(r'TAGS:\s*(.+?)(?:\n|CONTENT:)', text, re.DOTALL)
+        content_idx = text.rfind('CONTENT:')
 
-        if not all([title_match, desc_match, content_match]):
+        if not title_matches or not desc_matches or content_idx == -1:
             logger.error('Failed to parse generated content')
             return None
 
-        title = title_match.group(1).strip()
-        description = desc_match.group(1).strip()
-        tags_str = tags_match.group(1).strip() if tags_match else ''
-        content = content_match.group(1).strip()
+        title = title_matches[-1].strip()
+        description = desc_matches[-1].strip()
+        tags_str = tags_matches[-1].strip() if tags_matches else ''
+        content = text[content_idx + len('CONTENT:'):].strip()
 
         # Remove IMAGE_PROMPT and MERMAID lines from content
         content = re.sub(r'\n?IMAGE_PROMPT:\s*.+?\n', '\n', content)
         content = re.sub(r'\n?MERMAID:\s*.+?\n', '\n', content, flags=re.DOTALL)
-        
+
         # Remove mermaid code blocks from content (they'll be injected separately)
         content = re.sub(r'\n?```mermaid\n.*?\n```\n?', '\n', content, flags=re.DOTALL)
-        
+
         # Also remove mermaid code without fences (sometimes LLM includes raw mermaid)
         # Remove lines that are clearly mermaid arrow syntax (A --> B, A -.-> B, etc.)
         # but preserve lines that merely mention --> in prose (e.g. HTML comments)
@@ -309,7 +408,7 @@ def parse_generated_content(text: str) -> Optional[dict]:
         lines = content.split('\n')
         lines = [line for line in lines if not mermaid_arrow_re.match(line)]
         content = '\n'.join(lines)
-        
+
         content = content.strip()
 
         # Parse tags
@@ -372,9 +471,7 @@ def validate_post(post_data: dict) -> dict:
 
 
 def review_post(post_data: dict) -> dict:
-    """LLM-based review. Returns corrections."""
-    # NOTE: literal curly braces in JSON examples are escaped as {{ and }}
-    # so Python .format() does not treat them as placeholders.
+    """LLM-based review with automatic model fallback."""
     review_prompt = """Eres un editor profesional de contenido en español. Revisa este artículo de blog y corrige cualquier problema.
 
 Problemas a buscar y corregir:
@@ -415,37 +512,26 @@ CONTENT: {content}"""
         content=post_data['content'],
     )
 
-    try:
-        resp = requests.post(
-            f'{OLLAMA_BASE_URL}/api/generate',
-            json={
-                'model': OLLAMA_MODEL,
-                'prompt': prompt,
-                'stream': False,
-            },
-            timeout=180,
-        )
-        resp.raise_for_status()
-        response_text = resp.json().get('response', '')
+    models_to_try = get_models_to_try()
 
+    for model in models_to_try:
+        response_text = call_ollama(prompt, model)
         if not response_text:
-            logger.warning('Empty review response, skipping review')
-            return {'valid': True, 'issues': []}
+            continue
 
         # Parse JSON from response
-        # Try to extract JSON from the response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
-            review_result = json.loads(json_match.group())
-            logger.info(f'Review: valid={review_result.get("valid")}, issues={len(review_result.get("issues", []))}')
-            return review_result
-        else:
-            logger.warning('Could not parse review JSON, skipping review')
-            return {'valid': True, 'issues': []}
+            try:
+                review_result = json.loads(json_match.group())
+                logger.info(f'Review OK with {model}: valid={review_result.get("valid")}')
+                return review_result
+            except json.JSONDecodeError:
+                logger.warning(f'Model {model} returned invalid JSON for review')
+                continue
 
-    except Exception as e:
-        logger.error(f'Review failed: {e}')
-        return {'valid': True, 'issues': []}
+    logger.warning('All models failed for review, skipping')
+    return {'valid': True, 'issues': []}
 
 
 def generate_content_with_review(story: dict, prompt_template: str) -> Optional[dict]:
@@ -484,6 +570,54 @@ def generate_content_with_review(story: dict, prompt_template: str) -> Optional[
     return post_data
 
 
+QUARANTINE_DIR = PROJECT_ROOT / '.quarantine'
+
+
+def sanitize_mdx(content: str) -> str:
+    """Fix common MDX syntax errors produced by LLMs."""
+    # Autolinks like <https://example.com> are invalid in MDX.
+    content = re.sub(r'<(https?://[^>\s]+)>', r'\1', content)
+    # Leaked reasoning tags.
+    content = content.replace('</think>', '')
+    # Remove leaked structured-output headers if they ended up inside the body.
+    content = re.sub(
+        r'^(?:TITLE|DESCRIPTION|TAGS|CONTENT):.*\n?',
+        '',
+        content,
+        flags=re.MULTILINE,
+    )
+    return content.strip()
+
+
+def validate_build() -> tuple[bool, str]:
+    """Run the real Astro build. Returns (ok, error_output)."""
+    npm_bin = os.getenv('NPM_BIN') or shutil.which('npm') or 'npm'
+    try:
+        result = subprocess.run(
+            [npm_bin, 'run', 'build'],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+    except Exception as e:
+        return False, f'Build could not run: {e}'
+    if result.returncode == 0:
+        return True, ''
+    output = (result.stdout or '') + '\n' + (result.stderr or '')
+    return False, output[-5000:]
+
+
+def quarantine_post(filepath: Path, error: str) -> Path:
+    """Move a post that fails the build out of the content directory."""
+    QUARANTINE_DIR.mkdir(parents=True, exist_ok=True)
+    dest = QUARANTINE_DIR / filepath.name
+    shutil.move(str(filepath), str(dest))
+    (QUARANTINE_DIR / f'{filepath.stem}.error.log').write_text(error, encoding='utf-8')
+    logger.error(f'Post moved to quarantine: {dest}')
+    return dest
+
+
 def create_mdx_file(post_data: dict, image_urls: list[str], mermaid_code: Optional[str]) -> Path:
     """Create MDX file for the blog post."""
     now = datetime.now(timezone.utc)
@@ -517,7 +651,7 @@ draft: false
     # Inject images into content
     content_with_images = inject_images_into_content(post_data['content'], image_urls, mermaid_code)
 
-    content = frontmatter + content_with_images
+    content = frontmatter + sanitize_mdx(content_with_images)
 
     filepath.write_text(content, encoding='utf-8')
     logger.info(f'Created post: {filepath}')
@@ -526,33 +660,31 @@ draft: false
 
 def git_commit_and_push(filepath: Path, title: str):
     """Commit and push the new post to git."""
+    commit_msg = f"blog: add {title}"
     try:
-        # Stage the file
+        # Sync first so the new commit is applied on top of the remote branch.
+        pull_result = subprocess.run(
+            ['git', 'pull', '--rebase', '--autostash', 'origin', 'main'],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if pull_result.returncode != 0:
+            logger.error(f'git pull --rebase failed: {pull_result.stderr[-500:]}')
+            raise RuntimeError('git pull failed; refusing to commit on a diverged branch')
+
         subprocess.run(
             ['git', 'add', str(filepath)],
             cwd=PROJECT_ROOT,
             check=True,
             capture_output=True,
         )
-
-        # Commit
-        commit_msg = f"blog: add {title}"
         subprocess.run(
             ['git', 'commit', '-m', commit_msg],
             cwd=PROJECT_ROOT,
             check=True,
             capture_output=True,
         )
-
-        # Pull with rebase first (prevents push rejection if VPS cron already pushed)
-        subprocess.run(
-            ['git', 'pull', '--rebase', 'origin', 'main'],
-            cwd=PROJECT_ROOT,
-            check=True,
-            capture_output=True,
-        )
-
-        # Push
         subprocess.run(
             ['git', 'push', 'origin', 'main'],
             cwd=PROJECT_ROOT,
@@ -640,7 +772,17 @@ def main():
                 # Create MDX file
                 filepath = create_mdx_file(post_data, image_urls, mermaid_code)
 
-                # Git commit and push
+                # Never commit a post that breaks the Astro build.
+                ok, build_error = validate_build()
+                if not ok:
+                    quarantine_post(filepath, build_error)
+                    logger.error(
+                        f'Build validation failed for {filepath.name}; post quarantined. '
+                        f'Error tail: {build_error[-1500:]}'
+                    )
+                    continue
+
+                # Git commit and push (GitHub Actions triggers the Coolify deploy)
                 git_commit_and_push(filepath, post_data['title'])
                 generated += 1
             else:
@@ -649,79 +791,8 @@ def main():
             logger.error(f'Error processing story "{story["title"]}": {e}', exc_info=True)
             continue
 
-    if generated > 0:
-        rebuild_container()
-
     logger.info(f'Generation complete. Created {generated} posts.')
     return generated
-
-
-def rebuild_container():
-    """Rebuild Docker image and restart the blog container after new posts."""
-    CONTAINER_NAME = 't7uiqlyznon79xi2i7pb3-211232135618'
-    IMAGE_NAME = 'blog:latest'
-    try:
-        logger.info('Rebuilding Docker container for deployment...')
-        subprocess.run(
-            ['docker', 'build', '-t', IMAGE_NAME, '.'],
-            cwd=PROJECT_ROOT,
-            check=True,
-            capture_output=True,
-        )
-        # Get current container config before stopping
-        inspect = subprocess.run(
-            ['docker', 'inspect', CONTAINER_NAME, '--format', '{{json .Config.Env}}'],
-            capture_output=True, text=True,
-        )
-        env_vars = json.loads(inspect.stdout) if inspect.returncode == 0 else []
-
-        # Stop and remove old container
-        subprocess.run(['docker', 'stop', CONTAINER_NAME], capture_output=True)
-        subprocess.run(['docker', 'rm', CONTAINER_NAME], capture_output=True)
-
-        # Recreate with same config
-        cmd = [
-            'docker', 'run', '-d',
-            '--name', CONTAINER_NAME,
-            '--network', 'coolify',
-        ]
-        for env in env_vars:
-            if env.startswith('SOURCE_COMMIT='):
-                continue  # skip old commit
-            cmd.extend(['-e', env])
-        cmd.extend([
-            '-e', f'SOURCE_COMMIT={subprocess.check_output(["git", "-C", str(PROJECT_ROOT), "rev-parse", "HEAD"], text=True).strip()}',
-            '--label', 'coolify.applicationId=17',
-            '--label', 'coolify.environmentName=production',
-            '--label', 'coolify.managed=true',
-            '--label', 'coolify.name=zzhjq78rmhdl4aw6d0vdn3rz',
-            '--label', 'coolify.projectName=my-first-project',
-            '--label', 'coolify.resourceName=blog',
-            '--label', 'coolify.serviceName=blog',
-            '--label', 'coolify.type=application',
-            '--label', 'coolify.version=4.1.2',
-            '--label', 'coolify.pullRequestId=0',
-            '--label', 'caddy_ingress_network=coolify',
-            '--label', 'traefik.enable=true',
-            '--label', 'traefik.http.middlewares.gzip.compress=true',
-            '--label', 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https',
-            '--label', f'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.entryPoints=http',
-            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.middlewares=redirect-to-https',
-            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.rule=Host(`blog.sebastianmorales.sbs`) && PathPrefix(`/`)',
-            '--label', 'traefik.http.routers.http-0-zzhjq78rmhdl4aw6d0vdn3rz.service=http-0-zzhjq78rmhdl4aw6d0vdn3rz',
-            '--label', 'traefik.http.services.http-0-zzhjq78rmhdl4aw6d0vdn3rz.loadbalancer.server.port=80',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.entryPoints=https',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.middlewares=gzip,redirect-to-https',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.rule=Host(`blog.sebastianmorales.sbs`) && PathPrefix(`/`)',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.service=http-0-zzhjq78rmhdl4aw6d0vdn3rz',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.tls.certresolver=letsencrypt',
-            '--label', 'traefik.http.routers.https-0-zzhjq78rmhdl4aw6d0vdn3rz.tls.domains[0].main=blog.sebastianmorales.sbs',
-            IMAGE_NAME,
-        ])
-        subprocess.run(cmd, check=True, capture_output=True)
-        logger.info('Container rebuilt and restarted successfully.')
-    except Exception as e:
-        logger.error(f'Container rebuild failed: {e}')
 
 
 if __name__ == '__main__':
